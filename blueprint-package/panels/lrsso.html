@@ -1,0 +1,60 @@
+
+<script>
+	var logoutUrl="%%GLOBAL_ShopPath%%/login.php?action=logout";
+	LoginRadiusSSO.init(raasoption.appName,"",true);
+	
+	function lrSSOlogoutCallback()
+	{
+		LoginRadiusSSO.logout(function(){
+			console.log("Session not found");	
+			window.location=logoutUrl;
+		});
+	  
+	}
+
+	function lrSSOloggedInCallback()
+	{
+	 LoginRadiusSSO.login(function(token){
+		
+			var url = LoginRadius_Bigcommerce.util.getURL(token,raasoption.apikey ,"",storeName);
+			LoginRadius_Bigcommerce.util.jsonpCall(url,function(tokendata){
+						
+							if(tokendata.loginUrl!=null)
+							{
+								
+								LoginRadius_Bigcommerce.util.sendusertosite(tokendata.loginUrl);
+							}else{
+								lrSSOlogoutCallback();
+							}
+						}); 
+			});
+		
+	}
+	
+
+	window.onload = function() {
+		var currentUser="%%GLOBAL_CurrentCustomerFirstName%%";
+		var checkoutlink="%%GLOBAL_CheckoutLink%%";
+		
+		$('a[href$="action=logout"]').attr("onclick","lrSSOlogoutCallback()");
+
+		$('a[href="'+checkoutlink+'"]').attr('onclick',"assignCheckout(this)");
+
+		if(currentUser=="Guest" && currentUser!=""){
+			LoginRadiusSSO.isNotLoginThenLogout(function(){}, lrSSOloggedInCallback);
+		}
+		else{
+			
+			LoginRadiusSSO.isNotLoginThenLogout(lrSSOlogoutCallback, function(){});
+		}
+		
+	};	
+	function assignCheckout(element){
+		var currentUser="%%GLOBAL_CurrentCustomerFirstName%%";
+		if(currentUser=="Guest" && currentUser!=""){
+			element.href="%%GLOBAL_ShopPath%%/login.php";
+			return true;
+		}
+	}
+	
+</script>
