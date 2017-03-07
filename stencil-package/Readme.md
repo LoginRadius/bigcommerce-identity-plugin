@@ -15,11 +15,11 @@ This will install the LoginRadius App into your Bigcommerce environment. If you 
 1. Copy the contents of the “assets” folder into your theme's assets folder
 1. Copy the contents of the “components” folder into your themes templates->components folder. 
 
-Modifying your Stencil Theme
+##Modifying your Stencil Theme
 
 1. Open the config.js in your theme->assets->loginradius->assets->js and update the LoginRadius options object with your LoginRadius API key and Site Name. 
 
-Include the reference files for LoginRadius in your header section by including the following code in your theme->templates->components->common->header.html just before the closing </header> tag
+1. Include the reference files for LoginRadius in your header section by including the following code in your theme->templates->components->common->header.html just before the closing </header> tag
 ```
 {{> components/loginradius/LRreferences }}
 ```
@@ -39,7 +39,8 @@ This will display the pre-styled User authentication features which includes han
 ```
 <a class="navUser-action" onclick="lrSSOlogoutCallback()" href="#">{{lang 'common.logout'}}</a>
 ```
-Additional Theme options
+
+##Additional Theme options
 
 The above steps will allow you to get quickly setup and all of the interfaces can be directly customized using the css, js and html that comes in the Bigcommerce-Stencil-Package.zip. We have also included some more basic functions to display the interfaces that you can use to customize the look and feel or to embed specific interfaces directly on your preexisting forms. 
 
