@@ -1,17 +1,17 @@
 
 
-##Bigcommerce Configuration
-1. Log in to your Bigcommerce admin panel
+##BigCommerce Configuration
+1. Log in to your BigCommerce admin panel
 1. Click on “Apps”
 1. Click on Marketplace
 1. Search for “LoginRadius”
 1. Click on the LoginRadius app and click “Install”
 
-This will install the LoginRadius App into your Bigcommerce environment. If you receive any errors or have not previously spoken with the LoginRadius Support team to configure your BigCommerce integration reach out via the LoginRadius support channels to get access to the BigCommerce integration. 
+This will install the LoginRadius App into your BigCommerce environment. If you receive any errors or have not previously spoken with the LoginRadius Support team to configure your BigCommerce integration reach out via the LoginRadius support channels to get access to the BigCommerce integration. 
 
 ##Stencil Theme Setup
 1. Download a copy of your existing Stencil theme. 
-1. Unzip the LoginRadius Bigcommerce-Stencil-Package
+1. Unzip the LoginRadius BigCommerce-Stencil-Package
 1. Copy the contents of the “assets” folder into your theme's assets folder
 1. Copy the contents of the “components” folder into your themes templates->components folder. 
 
@@ -42,7 +42,7 @@ This will display the pre-styled User authentication features which includes han
 
 ##Additional Theme options
 
-The above steps will allow you to get quickly setup and all of the interfaces can be directly customized using the css, js and html that comes in the Bigcommerce-Stencil-Package.zip. We have also included some more basic functions to display the interfaces that you can use to customize the look and feel or to embed specific interfaces directly on your preexisting forms. 
+The above steps will allow you to get quickly setup and all of the interfaces can be directly customized using the css, js and html that comes in the BigCommerce-Stencil-Package.zip. We have also included some more basic functions to display the interfaces that you can use to customize the look and feel or to embed specific interfaces directly on your preexisting forms. 
 
 The following options are available to render specific interfaces:
 1. ```{{> components/loginradius/auth }}``` - Displays the full LoginRadius interface.
