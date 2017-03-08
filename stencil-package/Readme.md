@@ -9,7 +9,19 @@
 
 This will install the LoginRadius App into your BigCommerce environment. If you receive any errors or have not previously spoken with the LoginRadius Support team to configure your BigCommerce integration reach out via the LoginRadius support channels to get access to the BigCommerce integration. 
 
+##Uninstall Process
+If you have installed the LoginRadius BigCommerce App on your BigCommerce Site and have customized the BluePrint Theme with the below steps please make sure you revert the following items: 
+
+1. Remove the Scripts, CSS, and Content included in "Stencil Theme Setup" Section
+1. Remove the LoginRadius component files from the “components”
+1. Revert any Customizations made to the theme->templates->pages>auth->login.html
+1. Revert any Customizations made to theme->templates->components->common->header.html
+1. Revert any Customizations made to embedded links and any other pages that you have added a LoginRadius Panel. 
+
 ##Stencil Theme Setup
+
+It is recommended that you backup your theme before making any modifications in case you would like to revert the changes at some point. 
+
 1. Download a copy of your existing Stencil theme. 
 1. Unzip the LoginRadius BigCommerce-Stencil-Package
 1. Copy the contents of the “assets” folder into your theme's assets folder

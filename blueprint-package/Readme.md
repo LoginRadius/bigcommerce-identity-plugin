@@ -9,9 +9,20 @@
 
 This will install the LoginRadius App into your BigCommerce environment. If you receive any errors or have not previously spoken with the LoginRadius Support team to configure your BigCommerce integration reach out via the LoginRadius support channels to get access to the BigCommerce integration. 
 
+##Uninstall Process
+If you have installed the LoginRadius BigCommerce App on your BigCommerce Site and have customized the BluePrint Theme with the below steps please make sure you revert the following items: 
+
+1. Remove the Scripts, CSS, and Content included in "BluePrint Theme Setup" Section
+1. Remove the LoginRadius panels files from the webdav/Panels
+1. Revert any Customizations made to the webdav/Panels/LoginForm.html
+1. Revert any Customizations made to webdav/Panels/header.html or webdav/Panels/HTMLHead.html
+1. Revert any Customizations made to embedded links and any other pages that you have added a LoginRadius Panel. 
+
 ##Blueprint Theme Setup
 
 The following sections presumes you have a standard BigCommerce custom template configured on your WebDav, If you need assitance in setting this up please contact the LoginRadius support team. 
+
+It is recommended that you backup your theme before making any modifications in case you would like to revert the changes at some point. 
 
 1. Open WebDav Access to your BigCommerce Site. 
 1. Unzip the LoginRadius BigCommerce-blueprint-Package
