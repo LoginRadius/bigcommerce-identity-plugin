@@ -42,9 +42,9 @@ The following sections presumes you have a standard BigCommerce custom template 
 This will display the pre-styled User authentication features which includes handling of Login, Social Login, Registration, Forgot password, and Reset Password. 
 
 
-5. If you are using SSO you will need to handle the Logout functionality by opening the navigation.html file in your theme->templates->components->common and change the logout link to 
+5. Logout is handled automatically in the lrsso.html panel. If you have custom logout links on any of your pages you can add the following on click action to them to tie into the normal LoginRadius Logout procedures. 
 ```
-<a class="navUser-action" onclick="lrSSOlogoutCallback()" href="#">{{lang 'common.logout'}}</a>
+lrSSOlogoutCallback(); return false;
 ```
 
 6. You will need to update any of the dynamicaly created checkout page links if you are using the streamlined cart flow. 
@@ -54,7 +54,7 @@ This will display the pre-styled User authentication features which includes han
 Note: Guest checkout is not supported by BigCommerce for Customized Login Providers
 
 ##Additional Theme options
-The above steps will allow you to get quickly setup and all of the interfaces can be directly customized using the css, js and html that comes in the BigCommerce-blueprint-Package.zip. We have also included some more basic functions to display the interfaces that you can use to customize the look and feel or to embed specific interfaces directly on your preexisting forms. 
+The above steps will allow you to get quickly setup and all of the interfaces can be directly customized using the css, js and html that comes in the BluePrint Package. We have also included some more basic functions to display the interfaces that you can use to customize the look and feel or to embed specific interfaces directly on your preexisting forms. 
 
 The following options are available to render specific interfaces:
 

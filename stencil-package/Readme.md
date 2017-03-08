@@ -42,7 +42,7 @@ This will display the pre-styled User authentication features which includes han
 
 ##Additional Theme options
 
-The above steps will allow you to get quickly setup and all of the interfaces can be directly customized using the css, js and html that comes in the BigCommerce-Stencil-Package.zip. We have also included some more basic functions to display the interfaces that you can use to customize the look and feel or to embed specific interfaces directly on your preexisting forms. 
+The above steps will allow you to get quickly setup and all of the interfaces can be directly customized using the css, js and html that comes in the Stencil Package. We have also included some more basic functions to display the interfaces that you can use to customize the look and feel or to embed specific interfaces directly on your preexisting forms. 
 
 The following options are available to render specific interfaces:
 1. ```{{> components/loginradius/auth }}``` - Displays the full LoginRadius interface.
