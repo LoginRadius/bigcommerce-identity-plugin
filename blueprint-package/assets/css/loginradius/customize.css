@@ -328,7 +328,7 @@ content: "or";
 }
 
 #fade {
-    background: rgba(27,134,184,0.8);
+    background: rgba(196, 211, 220, .4);
     height: 100%;
     position: fixed;
     width: 100%;

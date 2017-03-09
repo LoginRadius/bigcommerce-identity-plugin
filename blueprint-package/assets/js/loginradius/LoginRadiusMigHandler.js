@@ -21,15 +21,17 @@ var saveData = function(){
 					},
 		  success: function(resultData){
 			  
-			  if(resultData.ErrorCode || resultData.errorCode){
+			  if(resultData.ErrorCode || resultData.errorCode||resultData.verified==false){
 					if(resultData.Description)
 						LoginRadiusBCUX.interface.showMessage(resultData.Description,10000);
 					if(resultData.description)
 						LoginRadiusBCUX.interface.showMessage(resultData.description,10000);
+					document.getElementById("fade").style="display:none";
 			  }else{
 				$('#loginradius-raas-submit-Login').parents('form:first').removeAttr('onsubmit');
 				$('#loginradius-raas-submit-Login').parents('form:first')[0].onsubmit=onSubmitCache;
 				$('#loginradius-raas-submit-Login').click();
+				
 			  }
 		  },
 		  error:function(result){

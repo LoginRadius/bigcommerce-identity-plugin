@@ -34,9 +34,12 @@
 
 	window.onload = function() {
 	 LoginRadiusRaaS.$hooks.setProcessHook(function() {
-		document.getElementById("fade").style="display:block";
+	 if(document.getElementById("register-div").innerHTML.length>100 ){
+			document.getElementById("fade").style="display:block";
+		}
 	}, function() {
 		//call on process end
+		
 		
 	});
 		var currentUser="%%GLOBAL_CurrentCustomerFirstName%%";
@@ -61,6 +64,8 @@
 			element.href="%%GLOBAL_ShopPath%%/login.php";
 			return true;
 		}
+		
+
 	}
 	
 </script>
@@ -68,8 +73,8 @@
  <div id="fade" style="position: fixed; height: 100%; width: 100%; background-color:transparent;
         opacity: 0.8; top: 0px; left: 0px; display:none;">
               <div class="lr-loading-frame">
-                    <div class="lr-loading-box" style="background: url() no-repeat center center;">
-                        <span class="lr-loading-text-box">Processing</span>
+                    <div class="lr-loading-box" style="background: url(//cdn.loginradius.com/demo/common/loading_spinner.gif) no-repeat center center;">
+                        <span class="lr-loading-text-box"></span>
                     </div>
                     
                 </div>

@@ -62,8 +62,10 @@ LoginRadiusBCUX = (function (doc) {
 						if(tokendata.loginUrl!=null)
 						{
 							$LRBC.util.sendusertosite(tokendata.loginUrl);
+						}else{
+							LRBCUX.interface.showMessage("Something went wrong during login please try again",5000);
+							document.getElementById("fade").style="display:none";
 						}
-					document.getElementById("fade").style="display:none";
 					}); 
 				
 			}, function(errors) {
@@ -108,8 +110,10 @@ LoginRadiusBCUX = (function (doc) {
 							if(data.loginUrl!=null)
 						{
 							$LRBC.util.sendusertosite(data.loginUrl);
+						}else{
+							LRBCUX.interface.showMessage("Something went wrong during login please try again",5000);
+							document.getElementById("fade").style="display:none";
 						}
-					document.getElementById("fade").style="display:none";
 						});
 				}, function(errors) {
 					// on failure this function will call ‘errors’ which is an array of errors with message.
@@ -154,7 +158,7 @@ LoginRadiusBCUX = (function (doc) {
 				// you can run a loop on this array.
 				if(errors.length && errors[0].description!=null)
 					LRBCUX.interface.showMessage(errors[0].description,5000);
-				if(errors.length && errors[0].message!=null)
+				if(errors.length && errors[0].message!=null &&errors[0].id)
 					LRBCUX.interface.showMessage(errors[0].message,5000);
 				document.getElementById("fade").style="display:none";
 			}, "resetpassword-container");
