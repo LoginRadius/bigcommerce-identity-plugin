@@ -148,6 +148,8 @@ LoginRadiusBCUX = (function (doc) {
 				// you can run a loop on this array.
 				if(errors.length && errors[0].description!=null)
 					LRBCUX.interface.showMessage(errors[0].description,5000);
+				if(errors.length && errors[0].message!=null)
+					LRBCUX.interface.showMessage(errors[0].message,5000);
 			}, "resetpassword-container");
 		};
 	
