@@ -63,14 +63,14 @@ LoginRadiusBCUX = (function (doc) {
 						{
 							$LRBC.util.sendusertosite(tokendata.loginUrl);
 						}
-				
+					document.getElementById("fade").style="display:none";
 					}); 
 				
 			}, function(errors) {
 				// on failure this function will call ‘errors’ which is an array of errors with message.
 				// every kind of error will be returned in this method
 				// you can run a loop on this array.
-				
+				document.getElementById("fade").style="display:none";
 				if(errors.length && errors[0].description!=null)
 					LRBCUX.interface.showMessage(errors[0].description,5000);
 				
@@ -84,8 +84,10 @@ LoginRadiusBCUX = (function (doc) {
 						console.log(response);			
 						if(response!=null && response.isPosted!=null && response.isPosted==true)
 							LRBCUX.interface.showMessage("An email has been sent to your account, please click on the link to verify your Email",5000);
+						document.getElementById("fade").style="display:none";
 				  }, function(errors) {
 						// On Errors
+						document.getElementById("fade").style="display:none";
 					if(errors.length && errors[0].description!=null)
 						LRBCUX.interface.showMessage(errors[0].description,5000);
 				  }, "register-div");
@@ -107,12 +109,13 @@ LoginRadiusBCUX = (function (doc) {
 						{
 							$LRBC.util.sendusertosite(data.loginUrl);
 						}
-					
+					document.getElementById("fade").style="display:none";
 						});
 				}, function(errors) {
 					// on failure this function will call ‘errors’ which is an array of errors with message.
 					// every kind of error will be returned in this method
 					// you can run a loop on this array.
+					document.getElementById("fade").style="display:none";
 					if(errors.length && errors[0].description!=null)
 						LRBCUX.interface.showMessage(errors[0].description,5000);
 				}, "sociallogin-container");
@@ -124,12 +127,13 @@ LoginRadiusBCUX = (function (doc) {
 				// response will be { isPosted : true }
 				// in this case user will get an email for password resetting
 					//   console.log(response);
-					
+					document.getElementById("fade").style="display:none";
 				LRBCUX.interface.showMessage("An Email link has been sent to the specified email. Click on the link to reset your password.",5000);
 			}, function(errors) {
 				// on failure this function will call ‘errors’ which is an array of errors with message.
 				// every kind of error will be returned in this method
 				// you can run a loop on this array.
+				document.getElementById("fade").style="display:none";
 				if(errors.length && errors[0].description!=null)
 					LRBCUX.interface.showMessage(errors[0].description,5000);
 			}, "forgotpassword-div");
@@ -141,7 +145,9 @@ LoginRadiusBCUX = (function (doc) {
 				// response will be { isPosted : true }
 				  //console.log(response);
 				    LoginRadiusBCUX.interface.toggleform('login');
+					
 				  LRBCUX.interface.showMessage("Your new password has been set",5000);
+				  document.getElementById("fade").style="display:none";
 			}, function(errors) {
 				// on failure this function will call 'errors' which is an array of errors with message.
 				// every kind of error will be returned in this method
@@ -150,6 +156,7 @@ LoginRadiusBCUX = (function (doc) {
 					LRBCUX.interface.showMessage(errors[0].description,5000);
 				if(errors.length && errors[0].message!=null)
 					LRBCUX.interface.showMessage(errors[0].message,5000);
+				document.getElementById("fade").style="display:none";
 			}, "resetpassword-container");
 		};
 	
@@ -161,10 +168,12 @@ LoginRadiusBCUX = (function (doc) {
 			if(!locCheck.includes("vtype=reset")){
 				LRBCUX.interface.showMessage("Your email has been successfully verified.",5000);
 			}
+			document.getElementById("fade").style="display:none";
 			}, function(errors) {
 			  // error
 				if(errors.length && errors[0].description!=null)
 					LRBCUX.interface.showMessage(errors[0].description,5000);
+				document.getElementById("fade").style="display:none";
 			});
 		};
 	

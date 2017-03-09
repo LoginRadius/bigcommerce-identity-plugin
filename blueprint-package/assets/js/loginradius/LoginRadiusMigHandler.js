@@ -8,7 +8,7 @@ var saveData = function(){
 		var password=$("#loginradius-raas-login-password").val();
 		var username=$("#loginradius-raas-login-emailid").val();
 		var validateData={"password":password,"emailid":username};
-
+		document.getElementById("fade").style="display:block";
 		$.ajax({
 		  type: "POST",
 		  url: url,
