@@ -1,5 +1,3 @@
-
-
 ##BigCommerce Configuration
 1. Log in to your BigCommerce admin panel
 1. Click on “Apps”
@@ -10,6 +8,7 @@
 This will install the LoginRadius App into your BigCommerce environment. If you receive any errors or have not previously spoken with the LoginRadius Support team to configure your BigCommerce integration reach out via the LoginRadius support channels to get access to the BigCommerce integration. 
 
 ##Uninstall Process
+
 If you have installed the LoginRadius BigCommerce App on your BigCommerce Site and have customized the BluePrint Theme with the below steps please make sure you revert the following items: 
 
 1. Remove the Scripts, CSS, and Content included in "BluePrint Theme Setup" Section
