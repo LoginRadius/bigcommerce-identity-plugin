@@ -1,4 +1,4 @@
-##BigCommerce Configuration
+## BigCommerce Configuration
 1. Log in to your BigCommerce admin panel
 1. Click on “Apps”
 1. Click on Marketplace
@@ -14,7 +14,7 @@ In order to support the BigCommerce SSO flows you will need to handle the follow
 1. Set First and Last Name to Required in your LoginRadius account -> API Configuration-> Registration Service
 2. Configure your BigCommerce site in the LoginRadius Dashboard-> Deployment
 
-##Uninstall Process
+## Uninstall Process
 
 If you have installed the LoginRadius BigCommerce App on your BigCommerce Site and have customized the BluePrint Theme with the below steps please make sure you revert the following items: 
 
@@ -24,7 +24,7 @@ If you have installed the LoginRadius BigCommerce App on your BigCommerce Site a
 1. Revert any Customizations made to webdav/Panels/header.html or webdav/Panels/HTMLHead.html
 1. Revert any Customizations made to embedded links and any other pages that you have added a LoginRadius Panel. 
 
-##Blueprint Theme Setup
+## Blueprint Theme Setup
 
 The following sections presumes you have a standard BigCommerce custom template configured on your WebDav, If you need assitance in setting this up please contact the LoginRadius support team. 
 
@@ -38,7 +38,7 @@ It is recommended that you backup your theme before making any modifications in 
 	3. assets/css- Copy the loginradius folder to your webdav/template/Styles folder
 1. Copy the contents of the “panels” folder to the webdav/Panels Folder
 
-##Modifying your BluePrint Theme
+## Modifying your BluePrint Theme
 
 1. Open the config.js in the provided BlueprintThemeFile\assets\js\loginradius and update the LoginRadius options object with your LoginRadius API key and Site Name. 
 
@@ -70,7 +70,7 @@ lrSSOlogoutCallback(); return false;
 
 Note: Guest checkout is not supported by BigCommerce for Customized Login Providers
 
-##Additional Theme options
+## Additional Theme options
 The above steps will allow you to get quickly setup and all of the interfaces can be directly customized using the css, js and html that comes in the BluePrint Package. We have also included some more basic functions to display the interfaces that you can use to customize the look and feel or to embed specific interfaces directly on your preexisting forms. 
 
 The following options are available to render specific interfaces:
