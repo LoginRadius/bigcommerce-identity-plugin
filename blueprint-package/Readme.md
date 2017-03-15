@@ -7,6 +7,13 @@
 
 This will install the LoginRadius App into your BigCommerce environment. If you receive any errors or have not previously spoken with the LoginRadius Support team to configure your BigCommerce integration reach out via the LoginRadius support channels to get access to the BigCommerce integration. 
 
+## LoginRadius Account Configuration
+
+In order to support the BigCommerce SSO flows you will need to handle the following: 
+
+1. Set First and Last Name to Required in your LoginRadius account -> API Configuration-> Registration Service
+2. Configure your BigCommerce site in the LoginRadius Dashboard-> Deployment
+
 ##Uninstall Process
 
 If you have installed the LoginRadius BigCommerce App on your BigCommerce Site and have customized the BluePrint Theme with the below steps please make sure you revert the following items: 
