@@ -101,20 +101,26 @@ LoginRadiusBCUX = (function (doc) {
 		LoginRadiusRaaS.init(raasoption, 'sociallogin', function(response) {
 					// On Success this callback will call
 					// response will be string as token
-					 var url=$LRBC.util.getURL(response,raasoption.apikey ,"",storeName);
-					
-					LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily",5000);
-					
-					$LRBC.util.jsonpCall(url,function(data){
+					if(response.isPosted){
+						document.getElementById("fade").style="display:none";
+						LRBCUX.interface.showMessage("An Email link has been sent to the specified email. Click on the link to reset your password.",5000);
+						LoginRadiusBCUX.interface.toggleform('login');
+					}else{
+						var url=$LRBC.util.getURL(response,raasoption.apikey ,"",storeName);
 						
-							if(data.loginUrl!=null)
-						{
-							$LRBC.util.sendusertosite(data.loginUrl);
-						}else{
-							LRBCUX.interface.showMessage("Something went wrong during login please try again",5000);
-							document.getElementById("fade").style="display:none";
-						}
-						});
+						LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily",5000);
+						
+						$LRBC.util.jsonpCall(url,function(data){
+							
+								if(data.loginUrl!=null)
+							{
+								$LRBC.util.sendusertosite(data.loginUrl);
+							}else{
+								LRBCUX.interface.showMessage("Something went wrong during login please try again",5000);
+								document.getElementById("fade").style="display:none";
+							}
+							});
+					}
 				}, function(errors) {
 					// on failure this function will call ‘errors’ which is an array of errors with message.
 					// every kind of error will be returned in this method
@@ -184,6 +190,11 @@ LoginRadiusBCUX = (function (doc) {
 	LRBCUX.interface.DisplayAuth=function (){
 
 		document.getElementById("authcontainer").style.display = 'block';
+		LoginRadiusRaaS.$hooks.socialLogin.onFormRender = function() {
+				LoginRadiusBCUX.interface.toggleform('additional');
+					
+				document.getElementById("fade").style="display:none";
+		};
 		$LR.util.ready(function() {
 		
 				LRBCUX.interface.definelogin();
@@ -213,7 +224,7 @@ LoginRadiusBCUX = (function (doc) {
 		 document.getElementById("lr-login-container").style.display = 'none';
 		 document.getElementById("lr-fp-container").style.display = 'none';
 		 document.getElementById("lr-reg-container").style.display = 'none';
-		
+		 document.getElementById("lr-additional-container").style.display = 'none';
 	};
 	LRBCUX.interface.toggleform=function (action)
 		{
@@ -231,7 +242,11 @@ LoginRadiusBCUX = (function (doc) {
 					case 'forgot':				
 						LRBCUX.interface.hideforms();
 						 document.getElementById("lr-fp-container").style.display = 'block';
-						break; 
+						break;
+					case 'additional':				
+						LRBCUX.interface.hideforms();
+						 document.getElementById("lr-additional-container").style.display = 'block';
+						break; 						
 					default:
 						break;
 			 }
