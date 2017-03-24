@@ -61,7 +61,7 @@
 	function assignCheckout(element){
 		var currentUser="%%GLOBAL_CurrentCustomerFirstName%%";
 		if(currentUser=="Guest" && currentUser!=""){
-			element.href="%%GLOBAL_ShopPath%%/login.php";
+			element.href="%%GLOBAL_ShopPath%%/login.php?return_url=%%GLOBAL_CheckoutLink%%";
 			return true;
 		}
 		
