@@ -5,7 +5,24 @@ var $LRBC = LoginRadius_Bigcommerce;
 LoginRadius_Bigcommerce.util={};
 
 (function (util) {
-	
+	function isLocalStorageNameSupported(lsname) {
+        if (!window["ignoreSessionStorage"]) {
+            if (window[lsname]) {
+                var testKey = 'test', storage = window[lsname];
+                try {
+                    storage.setItem(testKey, '1');
+                    storage.removeItem(testKey);
+                    return true;
+                } catch (error) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }	
 	util.jsonpCall = function (path, handle) {
         var func = 'Loginradius' + Math.floor((Math.random() * 1000000000000000000) + 1);
         window[func] = function (data) {
@@ -28,6 +45,18 @@ LoginRadius_Bigcommerce.util={};
 	util.sendusertosite=function (url){
 		setTimeout(function(){  window.location=url}, 2000);
 	};
+	
+	util.getBrowserStorage=function(key) {
+
+			if (isLocalStorageNameSupported('localStorage')) {
+				return localStorage.getItem(key);
+			}
+			if (isLocalStorageNameSupported('sessionStorage')) {
+				return sessionStorage.getItem(key);
+			}
+			return getCookie(key);
+		}
+
 	
 	util.getURL = function (access_token,apikey,password,store)
 	{
@@ -254,9 +283,31 @@ LoginRadiusBCUX = (function (doc) {
 		var profileeditor_options = {};
 			profileeditor_options.container = "profileeditor-container";
 			profileeditor_options.onSuccess = function(response) {
-	
-				console.log(response);
-				LRBCUX.interface.showMessage("Profile has been successfully updated",5000);
+				try{
+					var token="";
+					token=$LRBC.util.getBrowserStorage("LRTokenKey");
+					if(token.length>0)
+					{
+						var url=$LRBC.util.getURL(token,raasoption.apiKey ,"",storeName);
+						
+						$LRBC.util.jsonpCall(url,function(tokendata){
+						
+							if(tokendata.loginUrl!=null)
+							{
+								LRBCUX.interface.showMessage("Profile has been successfully updated",5000);
+								
+							}else{
+								LRBCUX.interface.showMessage("Something went wrong during update please try again",5000);
+								document.getElementById("fade").style.display = 'none';
+							}
+						}); 
+					}
+				}
+				catch(e){
+					LRBCUX.interface.showMessage("Something went wrong during update please try again",5000);
+					document.getElementById("fade").style.display = 'none';
+				}
+				
 			};
 			profileeditor_options.onError = function(response) {
 		
