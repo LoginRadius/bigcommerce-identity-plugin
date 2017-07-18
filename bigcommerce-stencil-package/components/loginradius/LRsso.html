@@ -1,0 +1,87 @@
+
+
+<script>
+	var logoutUrl="{{urls.auth.logout}}";
+	
+	
+	var logout_options= {};
+
+		logout_options.onSuccess = function() {
+			console.log("Session not found");	
+			window.location=logoutUrl;
+
+		};
+	function lrLogout()
+		{
+			
+				LRObject.init("logout", logout_options);
+			
+		  
+		};
+	function lrSSOlogoutCallback()
+	{
+		lrLogout();
+	}
+
+	
+	
+	var ssologin_options= {};
+	ssologin_options.onSuccess = function(response) {
+		var url = LoginRadius_Bigcommerce.util.getURL(token,option.appName ,"",storeName);
+			LoginRadius_Bigcommerce.util.jsonpCall(url,function(tokendata){
+						
+							if(tokendata.loginUrl!=null)
+							{
+								
+								LoginRadius_Bigcommerce.util.sendusertosite(tokendata.loginUrl);
+							}else{
+								lrSSOlogoutCallback();
+							}
+						}); 
+		};
+		
+	function lrSSOloggedInCallback()
+	{
+		LRObject.init("ssoLogin", ssologin_options);
+	}
+	
+	var check_options_login= {};
+	var check_options_logout= {};
+	check_options_logout.onError = lrSSOlogoutCallback;
+	check_options_logout.onSuccess=function(){};
+	
+	check_options_login.onSuccess = lrSSOloggedInCallback;
+	check_options_login.onError=function(){};
+	
+//{{#if customer}}
+	window.onload = function() {
+			LRObject.init("ssoNotLoginThenLogout", check_options_logout);
+	};	
+//{{else}}
+	window.onload = function() {
+			LRObject.init("ssoNotLoginThenLogout", check_options_login);
+	};	
+//{{/if}}
+
+window.onload = function() {
+	
+	LRObject.$hooks.register('startProcess',function ( ) {
+		if(document.getElementById("register-div")&&document.getElementById("register-div").innerHTML.length>100 ){
+				document.getElementById("fade").style.display = 'block';
+			}
+	  }
+	);
+};
+</script>
+
+
+<div id="fade" style="position: fixed; height: 100%; width: 100%; background-color:transparent;
+        opacity: 0.8; top: 0px; left: 0px; display:none;">
+              <div class="lr-loading-frame">
+                    <div class="lr-loading-box" style="background: url(//cdn.loginradius.com/demo/common/loading_spinner.gif) no-repeat center center;">
+                        <span class="lr-loading-text-box"></span>
+                    </div>
+                    
+                </div>
+	<div id="overshow" style="display:none"></div>
+</div>

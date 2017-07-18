@@ -1,0 +1,30 @@
+	
+		{{{stylesheet '/assets/loginradius/assets/css/customize.css'}}}
+		{{{stylesheet '/assets/loginradius/assets/css/lr-raas.css'}}}
+		
+	<div id="authcontainer"class="login-row" >
+		<div id="lr-message-container" style="display:none" class="lr-popup-message"></div>
+
+			<div  id="lr-reg-container" class="lr-popup-container">
+				<div id="lr-popup-body-container">
+					<h2>Profile Management</h2>
+					<div id="profileeditor-container"></div>				
+					<h2>Password Management</h2>
+					<div id="changepassword-container"></div>
+					<h2>Email Management</h2>	
+					<h3>Add New Email</h3>
+					<div id="addemail-container"></div>
+					
+					<h3>Remove Email</h3>
+					<div id="removeemail-container"></div>
+				</div>
+			</div>
+	</div>
+		<script>
+		LoginRadiusBCUX.interface.defineaddemail();
+		LoginRadiusBCUX.interface.defineremoveemail();
+		LoginRadiusBCUX.interface.definechangepassword();
+		LoginRadiusBCUX.interface.defineprofileeditor();	
+		</script>
+		
+
