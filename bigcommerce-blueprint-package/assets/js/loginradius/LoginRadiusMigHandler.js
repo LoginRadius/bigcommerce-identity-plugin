@@ -4,9 +4,9 @@ var bcStoreName=storeName;
 var inc=0;
 var onSubmitCache;
 var saveData = function(){
-		var url="https://cloud-api.loginradius.com/sso/bigcommerce/api/validatepassword?apikey="+lrRaasOptions.apikey+"&store="+bcStoreName+"";
-		var password=$("#loginradius-raas-login-password").val();
-		var username=$("#loginradius-raas-login-emailid").val();
+		var url="https://cloud-api.loginradius.com/sso/bigcommerce/api/validatepassword?apikey="+lrRaasOptions.apiKey+"&store="+bcStoreName+"";
+		var password=$("#loginradius-login-password").val();
+		var username=$("#loginradius-login-emailid").val();
 		var validateData={"password":password,"emailid":username};
 		document.getElementById("fade").style="display:block";
 		$.ajax({
@@ -28,9 +28,9 @@ var saveData = function(){
 						LoginRadiusBCUX.interface.showMessage(resultData.description,10000);
 					document.getElementById("fade").style="display:none";
 			  }else{
-				$('#loginradius-raas-submit-Login').parents('form:first').removeAttr('onsubmit');
-				$('#loginradius-raas-submit-Login').parents('form:first')[0].onsubmit=onSubmitCache;
-				$('#loginradius-raas-submit-Login').click();
+				$('#loginradius-submit-Login').parents('form:first').removeAttr('onsubmit');
+				$('#loginradius-submit-Login').parents('form:first')[0].onsubmit=onSubmitCache;
+				$('#loginradius-submit-Login').click();
 				
 			  }
 		  },
@@ -44,11 +44,11 @@ var await=function(){
 		setTimeout(function(){ hideSubmit() }, 50);
 	}
 var hideSubmit=function(){
-	if($('#loginradius-raas-submit-Login').length)
+	if($('#loginradius-submit-Login').length)
 		{
 			inc=0;
-			onSubmitCache=$('form[name="loginradius-raas-login"]')[0].onsubmit;
-			$('#loginradius-raas-submit-Login').parents('form:first').attr("onsubmit","saveData();return false;");
+			onSubmitCache=$('form[name="loginradius-login"]')[0].onsubmit;
+			$('#loginradius-submit-Login').parents('form:first').attr("onsubmit","saveData();return false;");
 			
 		}
 			
