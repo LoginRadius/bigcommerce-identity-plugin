@@ -82,7 +82,7 @@ LoginRadiusBCUX = (function (doc) {
 			
 			var login_options = {};
 			login_options.onSuccess = function(response,data) {
-				var url=$LRBC.util.getURL(response.access_token,raasoption.apiKey ,data.password,storeName);
+				var url=$LRBC.util.getURL(response.access_token,option.apiKey ,data.password,storeName);
 				
 				LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily",5000);
 				
@@ -137,7 +137,7 @@ LoginRadiusBCUX = (function (doc) {
 	LRBCUX.interface.definesocial=function (){
 
 		
-		LRObject.customInterface(".interfacecontainerdiv", raasoption);
+		LRObject.customInterface(".interfacecontainerdiv", option);
 		
 		var sl_options = {};
 			sl_options.onSuccess = function(response) {
@@ -148,7 +148,7 @@ LoginRadiusBCUX = (function (doc) {
 				LRBCUX.interface.showMessage("An email has been sent to the provided email address",5000);
 			}
 			else{
-			var url=$LRBC.util.getURL(response.access_token,raasoption.apiKey ,"",storeName);
+			var url=$LRBC.util.getURL(response.access_token,option.apiKey ,"",storeName);
 			
 			LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily",5000);
 			
@@ -288,7 +288,7 @@ LoginRadiusBCUX = (function (doc) {
 					token=$LRBC.util.getBrowserStorage("LRTokenKey");
 					if(token.length>0)
 					{
-						var url=$LRBC.util.getURL(token,raasoption.apiKey ,"",storeName);
+						var url=$LRBC.util.getURL(token,option.apiKey ,"",storeName);
 						
 						$LRBC.util.jsonpCall(url,function(tokendata){
 						

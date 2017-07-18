@@ -1,10 +1,10 @@
 
-var lrRaasOptions=raasoption;
+var lroptions=option;
 var bcStoreName=storeName;
 var inc=0;
 var onSubmitCache;
 var saveData = function(){
-		var url="https://cloud-api.loginradius.com/sso/bigcommerce/api/validatepassword?apikey="+lrRaasOptions.apiKey+"&store="+bcStoreName+"";
+		var url="https://cloud-api.loginradius.com/sso/bigcommerce/api/validatepassword?apikey="+lroptions.apiKey+"&store="+bcStoreName+"";
 		var password=$("#loginradius-login-password").val();
 		var username=$("#loginradius-login-emailid").val();
 		var validateData={"password":password,"emailid":username};

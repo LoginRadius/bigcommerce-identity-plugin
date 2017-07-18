@@ -34,7 +34,7 @@
 
 						ssologin_options.onSuccess = function(response) {
 										
-						var url = LoginRadius_Bigcommerce.util.getURL(response,raasoption.apikey ,"",storeName);
+						var url = LoginRadius_Bigcommerce.util.getURL(response,option.apikey ,"",storeName);
 						LoginRadius_Bigcommerce.util.jsonpCall(url,function(tokendata){
 								
 									if(tokendata.loginUrl!=null)
