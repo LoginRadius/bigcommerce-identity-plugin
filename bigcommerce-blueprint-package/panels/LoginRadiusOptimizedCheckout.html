@@ -1,0 +1,117 @@
+		<link rel="stylesheet" href="%%ASSET_Styles/loginradius/customize.css%%">
+		<link rel="stylesheet" href="%%ASSET_Styles/loginradius/custom-social.css%%">
+		<link rel="stylesheet" href="%%ASSET_Styles/loginradius/lr-raas.css%%">
+		<link rel="stylesheet" href="%%ASSET_Styles/loginradius/social-icons.css%%">
+		
+	<script src="//auth.lrcontent.com/v2/js/LoginRadiusV2.js"></script>	
+	<script src="%%ASSET_js/loginradius/config.js%%"></script>
+	<script src="%%ASSET_js/loginradius/LoginRadiusInterface.js%%"></script>
+	<!-- Uncomment this if you have done a user migration and want to update your migrated users with the Bigcommerce password
+	<script src="%%ASSET_js/loginradius/LoginRadiusMigHandler.js%%"></script>
+	-->	
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script type="text/html" id="loginradiuscustom_tmpl">
+		<span class="lr-provider-label lr-sl-shaded-brick-button lr-flat-<#=Name.toLowerCase()#>"
+			  onclick="return <#=ObjectName#>.util.openWindow('<#= Endpoint #>');"
+			  title="Sign in with <#= Name #>" alt="Sign in with <#=Name#>">
+			<span class="lr-sl-icon lr-sl-icon-<#=Name.toLowerCase()#>"></span>
+			Sign in with <#=Name#>
+		</span>
+	</script>
+	<script>
+
+	function lrDisplayLogin(){
+		lrHideall();
+		$("#login-div").show();
+		$(".interfacecontainerdiv").show();
+		$("#lrLinks").show();
+	};
+	
+	function showguest(){
+		lrHideall();
+		$("div[ui-view='guest']").show();
+	}
+	
+	function showforgot(){
+		lrHideall();
+		
+		$("#forgotContainer").show();
+		$("#lrLinks").show();
+	}
+	
+	function lrHideall(){
+		$("#lrLinks").hide();
+		$("#forgotContainer").hide();
+		$("#login-div").hide();
+		$(".interfacecontainerdiv").hide();
+		$("div[ui-view='guest']").hide();
+	}
+	
+	function showAdditional(){
+		lrHideall();
+		$("#sociallogin-container").show();
+		$("#lrLinks").show();
+	}
+	
+	var lrloadInterval = setInterval(function(){
+		if($("#checkout-customer-login").attr("href") != undefined){
+			clearInterval(lrloadInterval);
+			
+			$("#checkout-customer-login").replaceWith("<a onclick='lrDisplayLogin();return false;'>Sign in now</a>");
+			
+			var links=document.createElement('div');
+			links.setAttribute('id','lrLinks');
+			
+			var forgotLink=document.createElement('a')
+			forgotLink.setAttribute('onclick','showforgot();return false;');
+			forgotLink.innerHTML="Forgot Password";
+			
+			var guestLink=document.createElement('a')
+			guestLink.setAttribute('onclick','showguest();return false;');
+			guestLink.innerHTML="Continue as Guest";
+			
+			var registerLink=document.createElement('a')
+			registerLink.href="/login.php";
+			registerLink.innerHTML="Register an Account";
+			registerLink.setAttribute('target','_blank');
+			
+			links.appendChild(forgotLink);
+			links.appendChild(guestLink);
+			links.appendChild(registerLink);
+			
+			var forgotContainer=document.createElement('div');
+			forgotContainer.setAttribute('id','forgotContainer');
+			
+			var forgotElement=document.createElement('div');
+			forgotElement.setAttribute('id','forgotpassword-div');
+			var resetElement=document.createElement('div');
+			resetElement.setAttribute('id','resetpassword-container');
+			
+			forgotContainer.appendChild(forgotElement);
+			forgotContainer.appendChild(resetElement);
+			
+			
+			
+			$("div[ui-view='guest']").after(links);
+			$("div[ui-view='guest']").after('<div id="sociallogin-container" ></div>');
+			
+			$("div[ui-view='guest']").after(forgotContainer);
+			
+			$("div[ui-view='guest']").after('<div id="lr-message-container" style="display:none" class="lr-popup-message"></div>');
+			$("div[ui-view='guest']").after('<div id="login-div"></div>');
+			
+			$("div[ui-view='guest']").after('<div class="interfacecontainerdiv lr-sl-shaded-brick-frame lr-column"></div>');
+			LoginRadiusBCUX.interface.definesocial();
+			LoginRadiusBCUX.interface.definelogin();
+			LoginRadiusBCUX.interface.defineforgot();		
+			LoginRadiusBCUX.interface.definereset();
+			LoginRadiusBCUX.interface.injectSpinner();
+			showguest();
+			LRObject.$hooks.register('socialLoginFormRender',function(){
+				showAdditional();
+			});
+		}
+	},100);
+
+	</script>
