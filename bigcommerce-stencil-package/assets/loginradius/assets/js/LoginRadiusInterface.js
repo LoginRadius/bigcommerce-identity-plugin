@@ -57,10 +57,29 @@ LoginRadius_Bigcommerce.util={};
 			return getCookie(key);
 		}
 
-	
+	function getParameterByName(name, url) {
+		if (!url) {
+		  url = window.location.href;
+		}
+		name = name.replace(/[\[\]]/g, "\\$&");
+		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+			results = regex.exec(url);
+		if (!results) return null;
+		if (!results[2]) return '';
+		return decodeURIComponent(results[2].replace(/\+/g, " "));
+	}
+
 	util.getURL = function (access_token,apikey,password,store)
 	{
-		var url="//cloud-api.loginradius.com/sso/bigcommerce/api/token?access_token="+access_token +"&apikey="+apikey +"&store="+store+"&password="+password;
+		if(getParameterByName("return_url")){
+			var url="//cloud-api.loginradius.com/sso/bigcommerce/api/token?access_token="+access_token +"&apikey="+apikey +"&store="+store+"&password="+password+"&redirectto="+getParameterByName("return_url");
+
+		}else if(typeof islrCheckout !== 'undefined' && islrCheckout && checkoutURL!=null){
+			var url="//cloud-api.loginradius.com/sso/bigcommerce/api/token?access_token="+access_token +"&apikey="+apikey +"&store="+store+"&password="+password+"&redirectto="+checkoutURL;
+		}
+		else{
+			var url="//cloud-api.loginradius.com/sso/bigcommerce/api/token?access_token="+access_token +"&apikey="+apikey +"&store="+store+"&password="+password;
+		}
 		return url;
 	}
 	
