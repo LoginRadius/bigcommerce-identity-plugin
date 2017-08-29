@@ -49,22 +49,11 @@
 					LRObject.init("ssoLogin", ssologin_options);
 				
 		};
-
-
-	window.onload = function() {
-	LRObject.$hooks.register('startProcess',function ( ) {
-		if(document.getElementById("register-div")&&document.getElementById("register-div").innerHTML.length>100 ){
-				document.getElementById("fade").style.display = 'block';
-			}
-	  }
-	);
-
+       
 		var checkoutlink="%%GLOBAL_CheckoutLink%%";
-		
-		$('a[href="'+checkoutlink+'"]').attr('onclick',"assignCheckout(this)");
-		
+
 		if(enableSSO){	
-			$('a[href$="action=logout"]').attr("onclick","lrLogout();return false;");
+			
 			if(currentUser=="Guest" && currentUser!=""){
 				var checkoptionsGuest=check_options;
 				checkoptionsGuest.onError=function(){
@@ -80,12 +69,21 @@
 				LRObject.init("ssoNotLoginThenLogout", checkoptionsNotGuest);
 			};
 		}
+	window.onload = function() {
+		$('a[href$="action=logout"]').attr("onclick","lrLogout();return false;");
+		LRObject.$hooks.register('startProcess',function ( ) {
+			if(document.getElementById("register-div")&&document.getElementById("register-div").innerHTML.length>100 ){
+				document.getElementById("fade").style.display = 'block';
+			}
+	  }
+	);
+
 		
 	};	
 	function assignCheckout(element){
 		var currentUser="%%GLOBAL_CurrentCustomerFirstName%%";
 		if(currentUser=="Guest" && currentUser!=""){
-			element.href="%%GLOBAL_ShopPath%%/login.php";
+			//element.href="%%GLOBAL_ShopPath%%/login.php";
 			return true;
 		}
 		
