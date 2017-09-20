@@ -1,14 +1,15 @@
-
+		
 		<script type="text/html" id="loginradiuscustom_tmpl">
-				<span onclick="return $LR.util.openWindow('<#= Endpoint #>&is_access_token=true&callback=<#= window.location #>');"
-					  title="Sign up with <#= Name #>" alt="Sign in with <#=Name#>">
-					<span class="lr-sl-icon lr-sl-icon-<#=Name.toLowerCase()#>"></span>
-					Sign up with <#=Name#>
-				</span>
+			<span class="lr-provider-label lr-sl-shaded-brick-button lr-flat-<#=Name.toLowerCase()#>"
+				  onclick="return <#=ObjectName#>.util.openWindow('<#= Endpoint #>');"
+				  title="Sign in with <#= Name #>" alt="Sign in with <#=Name#>">
+				<span class="lr-sl-icon lr-sl-icon-<#=Name.toLowerCase()#>"></span>
+				Sign in with <#=Name#>
+			</span>
 		</script>
-		
-		
-		<div class="interfacecontainerdiv lr-sl-shaded-brick-frame lr-column"> </div>
+				
+		<div id="sociallogin-container" ></div>
+		<div class="interfacecontainerdiv lr-sl-shaded-brick-frame lr-column" id="interfacecontainerdiv"> </div>
 		
 				
 		<script>LoginRadiusBCUX.interface.definesocial();</script>

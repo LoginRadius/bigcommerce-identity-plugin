@@ -53,18 +53,18 @@
 	check_options_login.onSuccess = lrSSOloggedInCallback;
 	check_options_login.onError=function(){};
 	
-//{{#if customer}}
-	window.onload = function() {
-			LRObject.init("ssoNotLoginThenLogout", check_options_logout);
-	};	
-//{{else}}
-	window.onload = function() {
-			LRObject.init("ssoNotLoginThenLogout", check_options_login);
-	};	
-//{{/if}}
+
 
 window.onload = function() {
+	//{{#if customer}}
 	
+			LRObject.init("ssoNotLoginThenLogout", check_options_logout);
+	
+//{{else}}
+	
+			LRObject.init("ssoNotLoginThenLogout", check_options_login);
+	
+//{{/if}}
 	LRObject.$hooks.register('startProcess',function ( ) {
 		if(document.getElementById("register-div")&&document.getElementById("register-div").innerHTML.length>100 ){
 				document.getElementById("fade").style.display = 'block';
