@@ -50,10 +50,10 @@
 		$("#sociallogin-container").show();
 		$("#lrLinks").show();
 	}
-	
-	var lrloadInterval = setInterval(function(){
-		if($("#checkout-customer-login").attr("href") != undefined){
-			clearInterval(lrloadInterval);
+  
+  var lrloadInterval = setInterval(function(){ 
+    if($("#checkout-customer-login").attr("data-test") != undefined){ 
+      clearInterval(lrloadInterval);
 			
 			$("#checkout-customer-login").replaceWith("<a onclick='lrDisplayLogin();return false;'>Sign in now</a>");
 			
@@ -88,18 +88,17 @@
 			forgotContainer.appendChild(forgotElement);
 			forgotContainer.appendChild(resetElement);
 			
+			$("#checkout-customer-guest").after(links);
+			$("#checkout-customer-guest").after('<div id="sociallogin-container" ></div>');
 			
+			$("#checkout-customer-guest").after(forgotContainer);
 			
-			$("div[ui-view='guest']").after(links);
-			$("div[ui-view='guest']").after('<div id="sociallogin-container" ></div>');
+			$("#checkout-customer-guest").after('<div id="lr-message-container" style="display:none" class="lr-popup-message"></div>');
+			$("#checkout-customer-guest").after('<div id="login-div"></div>');
 			
-			$("div[ui-view='guest']").after(forgotContainer);
+			$("#checkout-customer-guest").after('<div class="interfacecontainerdiv lr-sl-shaded-brick-frame lr-column"></div>');
 			
-			$("div[ui-view='guest']").after('<div id="lr-message-container" style="display:none" class="lr-popup-message"></div>');
-			$("div[ui-view='guest']").after('<div id="login-div"></div>');
-			
-			$("div[ui-view='guest']").after('<div class="interfacecontainerdiv lr-sl-shaded-brick-frame lr-column"></div>');
-			LoginRadiusBCUX.interface.definesocial();
+		    LoginRadiusBCUX.interface.definesocial();
 			LoginRadiusBCUX.interface.definelogin();
 			LoginRadiusBCUX.interface.defineforgot();		
 			LoginRadiusBCUX.interface.definereset();
