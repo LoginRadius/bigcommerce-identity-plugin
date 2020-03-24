@@ -101,8 +101,13 @@ LoginRadiusBCUX = (function (doc) {
 			
 			var login_options = {};
 			login_options.onSuccess = function(response,data) {
-				var url=$LRBC.util.getURL(response.access_token,option.apiKey ,data.password,storeName);
 				
+				if(typeof data != 'undefined' && typeof data.password != 'undefined'){
+					var url=$LRBC.util.getURL(response.access_token, option.apiKey, data.password, storeName);
+				}else{
+					var url=$LRBC.util.getURL(response.access_token, option.apiKey, '', storeName);
+				}
+							
 				LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily",5000);
 				
 				$LRBC.util.jsonpCall(url,function(tokendata){
