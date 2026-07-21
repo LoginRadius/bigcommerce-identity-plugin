@@ -15,10 +15,6 @@ var saveData = function(){
 		  data: validateData,
 		  dataType: "json",
 		  crossDomain: true,
-		  headers: {
-						'Access-Control-Allow-Origin': '*',
-						'Access-Control-Allow-Headers': 'Content-Type' 
-					},
 		  success: function(resultData){
 			  
 			  if(resultData.ErrorCode || resultData.errorCode||resultData.verified==false){
@@ -40,7 +36,7 @@ var saveData = function(){
 	});
 }
 
-var await=function(){
+var scheduleHideSubmit=function(){
 		setTimeout(function(){ hideSubmit() }, 50);
 	}
 var hideSubmit=function(){
@@ -55,8 +51,8 @@ var hideSubmit=function(){
 	else{
 		inc++;
 		if(inc<=200){
-			await();
+			scheduleHideSubmit();
 		}
 	}
 }
-await();
+scheduleHideSubmit();

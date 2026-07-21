@@ -27,7 +27,7 @@
 	
 	var ssologin_options= {};
 	ssologin_options.onSuccess = function(response) {
-		var url = LoginRadius_Bigcommerce.util.getURL(token,option.appName ,"",storeName);
+		var url = LoginRadius_Bigcommerce.util.getURL(response.access_token,option.apiKey ,"",storeName);
 			LoginRadius_Bigcommerce.util.jsonpCall(url,function(tokendata){
 						
 							if(tokendata.loginUrl!=null)

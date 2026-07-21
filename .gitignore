@@ -1,0 +1,32 @@
+/Cornerstone-6.20.0
+.env
+node_modules
+secrets.stencil.json
+.stencil
+
+# Generated from config.template.js via scripts/generate-config.js 
+bigcommerce-stencil-package/assets/loginradius/assets/js/config.js
+
+# Local Cornerstone test theme (not part of the plugin)
+/.vscode/
+/assets/
+/lang/
+/meta/
+/parsed/
+/stencil_context/
+/templates/
+/CHANGELOG.md
+/config.json
+/config.stencil.json
+/Gruntfile.js
+/manifest.json
+/package.json
+/package-lock.json
+/schema.json
+/schemaTranslations.json
+/stencil.conf.cjs
+/webpack.common.js
+/webpack.dev.js
+/webpack.prod.js
+/README.md
+

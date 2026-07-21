@@ -1,10 +1,10 @@
-var storeName='<BigCommerce Site Name>';
+var storeName='__LR_STORE_NAME__';
 var enableSSO=true;
 
 var option = {};
-	option.apiKey = "<LoginRadius API Key>";
-	option.appName = "<LoginRadius Site Name>";
-	option.sott="<LoginRadius SOTT>";	
+	option.apiKey = "__LR_API_KEY__";
+	option.appName = "__LR_APP_NAME__";
+	option.sott="__LR_SOTT__";	
 	option.callbackUrl=window.location.href;	
 	option.formValidationMessage = true;
 	option.accessTokenResponse=true;
