@@ -11,13 +11,19 @@ const OUTPUT_PATH = path.join(
 	ROOT,
 	'bigcommerce-stencil-package/assets/loginradius/assets/js/config.js'
 );
+// Local Cornerstone test theme copy (mirrors the components/assets merge).
+// Written only when the theme is present, so a plugin-only checkout still works.
+const THEME_OUTPUT_PATH = path.join(
+	ROOT,
+	'assets/loginradius/assets/js/config.js'
+);
 
 // Placeholder token in the template -> .env variable name.
 const REQUIRED = {
 	__LR_STORE_NAME__: 'LR_STORE_NAME',
 	__LR_API_KEY__: 'LR_API_KEY',
-	__LR_APP_NAME__: 'LR_APP_NAME',
 	__LR_SOTT__: 'LR_SOTT',
+	__LR_TENANT_NAME__: 'LR_TENANT_NAME',
 };
 
 function parseEnv(contents) {
@@ -68,3 +74,12 @@ if (missing.length) {
 
 fs.writeFileSync(OUTPUT_PATH, output);
 console.log(`[generate-config] wrote ${path.relative(ROOT, OUTPUT_PATH)}`);
+
+// Deploy into the local test theme when it exists.
+const themeDir = path.dirname(THEME_OUTPUT_PATH);
+if (fs.existsSync(themeDir)) {
+	fs.writeFileSync(THEME_OUTPUT_PATH, output);
+	console.log(`[generate-config] copied to ${path.relative(ROOT, THEME_OUTPUT_PATH)}`);
+} else {
+	console.log('[generate-config] theme path not found; skipped theme copy');
+}

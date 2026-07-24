@@ -87,9 +87,9 @@
   vertical-align: middle;
   width: 32px;
   height: 32px;
-  background-image: url("%%ASSET_images/loginradius/icon-sprite-32.png%%");
+  background-image: url("../images/icon-sprite-32.png");
   /*Image fallback for ie8*/
-  background-image: linear-gradient(transparent, transparent), url("%%ASSET_images/loginradius/icon-sprite.svg%%");
+  background-image: linear-gradient(transparent, transparent), url("../images/icon-sprite.svg");
   /*SVG for scalability. Good for high resolution screens/retina*/
   background-size: 100% 3600%;
   background-position: 0 0;

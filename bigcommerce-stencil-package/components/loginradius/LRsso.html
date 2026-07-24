@@ -1,87 +1,90 @@
+{{!--
+	SSO session sync for LoginRadius V3 (SDK-independent).
 
+	Replaces the V2 init actions (ssoNotLoginThenLogout / ssoLogin / logout) with
+	documented Web SSO REST calls on the tenant hub:
 
+	  - Auto-login (guest): GET https://<tenant>.hub.loginradius.com/ssologin/login
+	      (withCredentials) -> { token, isauthenticated }. If a session exists on a
+	      sibling property, exchange the token for a BigCommerce session.
+	  - Auto-logout (logged-in): validate the shopper's token via
+	      GET https://api.loginradius.com/identity/v2/auth/access_token/Validate
+	      If no active session / invalid token, log out of BigCommerce.
+	  - Broadcast on login is handled in LoginRadiusInterface.js (ssologin/setToken).
+
+	Prerequisite: the storefront domain (and any sibling properties) must be listed
+	under Tenant Settings -> Configured Domains, and cross-domain AJAX whitelisted.
+--}}
 <script>
-	var logoutUrl="{{urls.auth.logout}}";
-	
-	
-	var logout_options= {};
+	(function () {
+		if (typeof enableSSO === 'undefined' || !enableSSO) {
+			return;
+		}
 
-		logout_options.onSuccess = function() {
-			console.log("Session not found");	
-			window.location=logoutUrl;
+		var apiKey = (typeof option !== 'undefined' && option) ? option.apiKey : '';
+		var tenant = (typeof ssoTenantName !== 'undefined') ? ssoTenantName : '';
+		var logoutUrl = "{{urls.auth.logout}}";
+		var isCustomerLoggedIn = {{#if customer}}true{{else}}false{{/if}};
 
-		};
-	function lrLogout()
-		{
-			
-				LRObject.init("logout", logout_options);
-			
-		  
-		};
-	function lrSSOlogoutCallback()
-	{
-		lrLogout();
-	}
+		if (!apiKey || !tenant) {
+			return;
+		}
+		var ssoBase = "https://" + tenant + ".hub.loginradius.com/ssologin/";
 
-	
-	
-	var ssologin_options= {};
-	ssologin_options.onSuccess = function(response) {
-		var url = LoginRadius_Bigcommerce.util.getURL(response.access_token,option.apiKey ,"",storeName);
-			LoginRadius_Bigcommerce.util.jsonpCall(url,function(tokendata){
-						
-							if(tokendata.loginUrl!=null)
-							{
-								
-								LoginRadius_Bigcommerce.util.sendusertosite(tokendata.loginUrl);
-							}else{
-								lrSSOlogoutCallback();
-							}
-						}); 
-		};
-		
-	function lrSSOloggedInCallback()
-	{
-		LRObject.init("ssoLogin", ssologin_options);
-	}
-	
-	var check_options_login= {};
-	var check_options_logout= {};
-	check_options_logout.onError = lrSSOlogoutCallback;
-	check_options_logout.onSuccess=function(){};
-	
-	check_options_login.onSuccess = lrSSOloggedInCallback;
-	check_options_login.onError=function(){};
-	
+		function loginToBigCommerce(token) {
+			var url = LoginRadius_Bigcommerce.util.getURL(token, apiKey, "", storeName);
+			LoginRadius_Bigcommerce.util.jsonpCall(url, function (tokendata) {
+				if (tokendata && tokendata.loginUrl != null) {
+					LoginRadius_Bigcommerce.util.sendusertosite(tokendata.loginUrl);
+				}
+			});
+		}
 
+		function validateToken(token) {
+			// Returns a promise resolving true if the token is still valid.
+			var url = "https://api.loginradius.com/identity/v2/auth/access_token/Validate?access_token=" +
+				encodeURIComponent(token) + "&apikey=" + encodeURIComponent(apiKey);
+			return fetch(url)
+				.then(function (r) { return r.ok; })
+				.catch(function () { return true; }); // network error: don't force logout
+		}
 
-window.onload = function() {
-	//{{#if customer}}
-	
-			LRObject.init("ssoNotLoginThenLogout", check_options_logout);
-	
-//{{else}}
-	
-			LRObject.init("ssoNotLoginThenLogout", check_options_login);
-	
-//{{/if}}
-	LRObject.$hooks.register('startProcess',function ( ) {
-		if(document.getElementById("register-div")&&document.getElementById("register-div").innerHTML.length>100 ){
-				document.getElementById("fade").style.display = 'block';
-			}
-	  }
-	);
-};
+		function checkSsoSession() {
+			return fetch(ssoBase + "login?apikey=" + encodeURIComponent(apiKey), { credentials: "include" })
+				.then(function (r) { return r.json(); });
+		}
+
+		function run() {
+			checkSsoSession().then(function (data) {
+				var isAuth = !!(data && data.isauthenticated === true);
+				var token = data && data.token;
+
+				if (isCustomerLoggedIn) {
+					// Auto-logout: no active LoginRadius session -> log out of BigCommerce.
+					if (!isAuth || !token) {
+						window.location = logoutUrl;
+						return;
+					}
+					validateToken(token).then(function (valid) {
+						if (!valid) {
+							window.location = logoutUrl;
+						}
+					});
+				} else {
+					// Auto-login: active session on a sibling property -> log into BigCommerce.
+					if (isAuth && token) {
+						loginToBigCommerce(token);
+					}
+				}
+			}).catch(function () {
+				// SSO check failed (network/CORS/not-whitelisted): leave session as-is.
+			});
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', run);
+		} else {
+			run();
+		}
+	})();
 </script>
-
-
-<div id="fade" style="position: fixed; height: 100%; width: 100%; background-color:transparent;
-        opacity: 0.8; top: 0px; left: 0px; display:none;">
-              <div class="lr-loading-frame">
-                    <div class="lr-loading-box" style="background: url(//cdn.loginradius.com/demo/common/loading_spinner.gif) no-repeat center center;">
-                        <span class="lr-loading-text-box"></span>
-                    </div>
-                    
-                </div>
-	<div id="overshow" style="display:none"></div>
-</div>

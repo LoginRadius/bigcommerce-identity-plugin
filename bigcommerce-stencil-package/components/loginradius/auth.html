@@ -1,98 +1,36 @@
-		{{{stylesheet '/assets/loginradius/assets/css/customize.css'}}}
-		{{{stylesheet '/assets/loginradius/assets/css/custom-social.css'}}}
-		{{{stylesheet '/assets/loginradius/assets/css/lr-raas.css'}}}
-		{{{stylesheet '/assets/loginradius/assets/css/social-icons.css'}}}
-
- 
-        <div style="display:none" id="authcontainer"class="login-row" >
-		<div id="lr-message-container" style="display:none" class="lr-popup-message">a </div>
-			<script type="text/html" id="loginradiuscustom_tmpl">
-				<span class="lr-provider-label lr-sl-shaded-brick-button lr-flat-<#=Name.toLowerCase()#>"
-					  onclick="return <#=ObjectName#>.util.openWindow('<#= Endpoint #>');"
-					  title="Sign in with <#= Name #>" alt="Sign in with <#=Name#>">
-					<span class="lr-sl-icon lr-sl-icon-<#=Name.toLowerCase()#>"></span>
-					Sign in with <#=Name#>
-				</span>
-			</script>
-			
-			<div style="display:none" id="lr-reg-container" class="lr-popup-container">
-				<div id="lr-popup-body-container">
-					<div class="interfacecontainerdiv lr-sl-shaded-brick-frame lr-column" id="interfacecontainerdiv"> 
-					</div>
-					<div id="register-div" class="lr-column">
-					</div>
-				
-				</div>
-				<div class="lr-links">
-					<div class="lr-links-align">
-						<div class="lr-links-inner">
-							<a href="#" onclick="LoginRadiusBCUX.interface.toggleform('login');return false;">Login</a>
-							<a href="#" onclick="LoginRadiusBCUX.interface.toggleform('forgot');return false;">Forgot Password</a>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<div  style="display:none" id="lr-additional-container" class="lr-popup-container">
-			
-				<div id="lr-popup-body-container">
-					
-					<div id="sociallogin-container" ></div>
-				
-				</div>
-				
-				<div class="lr-links">
-					<div class="lr-links-align">
-						<div class="lr-links-inner">
-							<a  href="#" onclick="LoginRadiusBCUX.interface.toggleform('forgot');return false;">Forgot Password or ID Provider?</a>
-							<a  href="#" onclick="LoginRadiusBCUX.interface.toggleform('register');return false;">Create a New Account</a>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<div  id="lr-login-container" class="lr-popup-container">
-			
-				<div id="lr-popup-body-container">
-					
-					<div id="lr-login-popup-message" class="lr-popup-message" style="display: none;"></div>
-					<div class="interfacecontainerdiv lr-sl-shaded-brick-frame lr-column" id="interfacecontainerdiv "> 
-					</div>
-					<div class="lr-login-col lr-column">
-						<h3>Login with Email</h3>
-						<div id="login-div" ></div>
-					</div>
-				</div>
-				<div class="lr-links">
-					<div class="lr-links-align">
-						<div class="lr-links-inner">
-							<a  href="#" onclick="LoginRadiusBCUX.interface.toggleform('forgot');return false;">Forgot Password or ID Provider?</a>
-							<a  href="#" onclick="LoginRadiusBCUX.interface.toggleform('register');return false;">Create a New Account</a>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<div style="display:none"   id="lr-fp-container" class="lr-popup-container">
-
-				<div id="lr-popup-body-container">
-					<div id="lr-forgot-popup-message" class="lr-popup-message" style="display: none;"></div>
-					<div id="forgotpassword-div">
-					</div>
-					<div id="resetpassword-container"></div>
-				</div>
-					<div class="lr-links">
-						<div class="lr-links-align">
-							<div class="lr-links-inner">
-								<a href="#" onclick="LoginRadiusBCUX.interface.toggleform('login');return false;">Login</a>
-							</div>
-						</div>
-					</div>
-			</div>
-		
-	</div>
-		<script>
-			LoginRadiusBCUX.interface.DisplayAuth();
-		</script>
-		
+{{!--
+	LoginRadius V3 auth UI. The unified `auth` component renders login,
+	registration, social login and forgot-password in a single widget
+	(styled by LoginRadiusV3.css, loaded via LRreferences). Verification
+	links are resolved by the verifyToken component.
+--}}
+<div id="authcontainer" class="login-row" style="display:none">
+	<div id="lr-message-container" class="lr-popup-message"
+		 style="display:none;margin:1rem 0;padding:0.75rem 1rem;border:1px solid #d9d9d9;border-radius:4px;background:#f7f7f7;"></div>
+	<div id="lr-auth-container"></div>
+	<div id="lr-verify-container"></div>
 </div>
+<script>
+	(function () {
+		var attempts = 0;
+		function lrInitAuth() {
+			// LRreferences (SDK + interface) may load after this inline
+			// script, so wait until both are available before running.
+			if (typeof LoginRadiusBCUX === 'undefined' || typeof LRObject === 'undefined') {
+				if (attempts++ < 100) {
+					return window.setTimeout(lrInitAuth, 50);
+				}
+				if (window.console) {
+					console.error('LoginRadius: interface/SDK failed to load; check LRreferences include.');
+				}
+				return;
+			}
+			LoginRadiusBCUX.interface.DisplayAuth();
+		}
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', lrInitAuth);
+		} else {
+			lrInitAuth();
+		}
+	})();
+</script>

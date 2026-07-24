@@ -1,65 +1,68 @@
 
-	
 var LoginRadius_Bigcommerce = {};
 var $LRBC = LoginRadius_Bigcommerce;
-LoginRadius_Bigcommerce.util={};
+LoginRadius_Bigcommerce.util = {};
 
+/* ------------------------------------------------------------------ *
+ * BigCommerce SSO bridge (SDK-agnostic).
+ * These helpers exchange a LoginRadius access token for a BigCommerce
+ * session via the LoginRadius-hosted endpoint. They do not depend on
+ * the LoginRadius SDK version.
+ * ------------------------------------------------------------------ */
 (function (util) {
 	function isLocalStorageNameSupported(lsname) {
-        if (!window["ignoreSessionStorage"]) {
-            if (window[lsname]) {
-                var testKey = 'test', storage = window[lsname];
-                try {
-                    storage.setItem(testKey, '1');
-                    storage.removeItem(testKey);
-                    return true;
-                } catch (error) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }	
-	util.jsonpCall = function (path, handle) {
-        var func = 'Loginradius' + Date.now() + Math.floor(Math.random() * 1e9);
-        window[func] = function (data) {
-            handle(data);
-            try {
-                delete window[func];
-            }
-            catch (e) {
-                window[func] = undefined;
-            }
-            document.body.removeChild(js);
-        };
-        var js = document.createElement('script');
-        js.src = path +"&callback="+func;
-        js.type = "text/javascript";
-        document.body.appendChild(js);
-    };
-	
-	
-	util.sendusertosite=function (url){
-		setTimeout(function(){  window.location=url}, 2000);
-	};
-	
-	util.getBrowserStorage=function(key) {
-
-			if (isLocalStorageNameSupported('localStorage')) {
-				return localStorage.getItem(key);
+		if (!window["ignoreSessionStorage"]) {
+			if (window[lsname]) {
+				var testKey = 'test', storage = window[lsname];
+				try {
+					storage.setItem(testKey, '1');
+					storage.removeItem(testKey);
+					return true;
+				} catch (error) {
+					return false;
+				}
+			} else {
+				return false;
 			}
-			if (isLocalStorageNameSupported('sessionStorage')) {
-				return sessionStorage.getItem(key);
-			}
-			return getCookie(key);
+		} else {
+			return false;
 		}
+	}
 
-	function getParameterByName(name, url) {
+	util.jsonpCall = function (path, handle) {
+		var func = 'Loginradius' + Date.now() + Math.floor(Math.random() * 1e9);
+		window[func] = function (data) {
+			handle(data);
+			try {
+				delete window[func];
+			} catch (e) {
+				window[func] = undefined;
+			}
+			document.body.removeChild(js);
+		};
+		var js = document.createElement('script');
+		js.src = path + "&callback=" + func;
+		js.type = "text/javascript";
+		document.body.appendChild(js);
+	};
+
+	util.sendusertosite = function (url) {
+		setTimeout(function () { window.location = url; }, 2000);
+	};
+
+	util.getBrowserStorage = function (key) {
+		if (isLocalStorageNameSupported('localStorage')) {
+			return localStorage.getItem(key);
+		}
+		if (isLocalStorageNameSupported('sessionStorage')) {
+			return sessionStorage.getItem(key);
+		}
+		return null;
+	};
+
+	util.getParameterByName = function (name, url) {
 		if (!url) {
-		  url = window.location.href;
+			url = window.location.href;
 		}
 		name = name.replace(/[\[\]]/g, "\\$&");
 		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
@@ -67,392 +70,145 @@ LoginRadius_Bigcommerce.util={};
 		if (!results) return null;
 		if (!results[2]) return '';
 		return decodeURIComponent(results[2].replace(/\+/g, " "));
-	}
+	};
 
-	util.getURL = function (access_token,apikey,password,store)
-	{
-		if(getParameterByName("return_url")){
-			var url="https://cloud-api.loginradius.com/sso/bigcommerce/api/token?access_token="+access_token +"&apikey="+apikey +"&store="+store+"&password="+password+"&redirectto="+getParameterByName("return_url");
-
-		}else if(typeof islrCheckout !== 'undefined' && islrCheckout && checkoutURL!=null){
-			var url="https://cloud-api.loginradius.com/sso/bigcommerce/api/token?access_token="+access_token +"&apikey="+apikey +"&store="+store+"&password="+password+"&redirectto="+checkoutURL;
+	// Broadcast a successful login to the LoginRadius Web SSO hub so other
+	// properties sharing this tenant can detect the session (fire-and-forget).
+	util.setSsoToken = function (access_token, apikey) {
+		if (typeof ssoTenantName === 'undefined' || !ssoTenantName) {
+			return;
 		}
-		else{
-			var url="https://cloud-api.loginradius.com/sso/bigcommerce/api/token?access_token="+access_token +"&apikey="+apikey +"&store="+store+"&password="+password;
-		}
-		return url;
-	}
-	
-	
-})(LoginRadius_Bigcommerce.util)
+		var url = "https://" + ssoTenantName + ".hub.loginradius.com/ssologin/setToken?token=" +
+			encodeURIComponent(access_token) + "&apikey=" + encodeURIComponent(apikey);
+		try {
+			fetch(url, { credentials: "include" }).catch(function () { });
+		} catch (e) { /* fetch unavailable / blocked: non-fatal */ }
+	};
 
+	util.getURL = function (access_token, apikey, password, store) {
+		var base = "https://cloud-api.loginradius.com/sso/bigcommerce/api/token?access_token=" +
+			access_token + "&apikey=" + apikey + "&store=" + store + "&password=" + password;
+		if (util.getParameterByName("return_url")) {
+			return base + "&redirectto=" + util.getParameterByName("return_url");
+		}
+		if (typeof islrCheckout !== 'undefined' && islrCheckout && typeof checkoutURL !== 'undefined' && checkoutURL != null) {
+			return base + "&redirectto=" + checkoutURL;
+		}
+		return base;
+	};
+})(LoginRadius_Bigcommerce.util);
+
+/* ------------------------------------------------------------------ *
+ * UI layer (LoginRadius V3 JS SDK / LoginRadiusSDK).
+ * ------------------------------------------------------------------ */
 LoginRadiusBCUX = (function (doc) {
 	var LRBCUX = {};
-	
-	LRBCUX.interface={};
-	
-	LRBCUX.interface.showMessage=function (msg,timeout){
-		 document.getElementById("lr-message-container").style.display = 'block';
-		 document.getElementById("lr-message-container").innerHTML=msg;
-		 setTimeout(function(){  document.getElementById("lr-message-container").style.display = 'none';}, timeout);
-		};
-		
-	LRBCUX.interface.definelogin=function (){
-			
-			var login_options = {};
-			login_options.onSuccess = function(response,data) {
-				
-				if(typeof data != 'undefined' && typeof data.password != 'undefined'){
-					var url=$LRBC.util.getURL(response.access_token, option.apiKey, data.password, storeName);
-				}else{
-					var url=$LRBC.util.getURL(response.access_token, option.apiKey, '', storeName);
-				}
-							
-				LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily",5000);
-				
-				$LRBC.util.jsonpCall(url,function(tokendata){
-					
-						if(tokendata.loginUrl!=null)
-						{
-							$LRBC.util.sendusertosite(tokendata.loginUrl);
-						}else{
-							LRBCUX.interface.showMessage("Something went wrong during login please try again",5000);
-							document.getElementById("fade").style.display = 'none';
-						}
-					}); 
-				
-			};
-			
-			login_options.onError = function(errors) {
-				document.getElementById("fade").style.display = 'none';
-				if(errors.length && errors[0].Description!=null)
-					LRBCUX.interface.showMessage(errors[0].Description,5000);
-				
-			};
-			login_options.container = "login-div";
-			LRObject.init("login",login_options);
+	LRBCUX.interface = {};
 
-		};
-	LRBCUX.interface.defineregister=function (){
-		
-		var registration_options = {}
-		
-			registration_options.onSuccess = function(response) {
-				// On Success
-				console.log(response);			
-				if(response!=null && response.IsPosted!=null && response.IsPosted==true)
-					LRBCUX.interface.showMessage("An email has been sent to your account, please click on the link to verify your Email",5000);
-				document.getElementById("fade").style.display = 'none';
-			};
-			
-			registration_options.onError = function(errors) {
-						
-				document.getElementById("fade").style.display = 'none';
-					if(errors.length && errors[0].Description!=null)
-						LRBCUX.interface.showMessage(errors[0].Description,5000);
-			};
-			
-			registration_options.container = "register-div";
-			
-			LRObject.init("registration",registration_options);	
-		
-		};
-	
-	LRBCUX.interface.definesocial=function (){
-
-		
-		LRObject.customInterface(".interfacecontainerdiv", option);
-		
-		var sl_options = {};
-			sl_options.onSuccess = function(response) {
-			// On Success this callback will call
-			// response will be string as token
-			if(response.IsPosted){
-				document.getElementById("fade").style.display = 'none';
-				LRBCUX.interface.showMessage("An email has been sent to the provided email address",5000);
-			}
-			else{
-			var url=$LRBC.util.getURL(response.access_token,option.apiKey ,"",storeName);
-			
-			LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily",5000);
-			
-			$LRBC.util.jsonpCall(url,function(data){
-				
-					if(data.loginUrl!=null)
-				{
-					$LRBC.util.sendusertosite(data.loginUrl);
-				}else{
-					LRBCUX.interface.showMessage("Something went wrong during login please try again",5000);
-					document.getElementById("fade").style.display = 'none';
-				}
-				});
-			}
-			
-			
-			
-			};
-			
-			sl_options.onError = function(errors) {
-				document.getElementById("fade").style.display = 'none';
-				if(errors.length && errors[0].Description!=null&& errors[0].ErrorCode!=905)
-					LRBCUX.interface.showMessage(errors[0].Description,5000);
-			};
-			sl_options.container = "sociallogin-container";
-		
-		LRObject.init('socialLogin', sl_options);
-		
+	LRBCUX.interface.showMessage = function (msg, timeout) {
+		var el = document.getElementById("lr-message-container");
+		if (!el) return;
+		el.style.display = 'block';
+		el.innerHTML = msg;
+		setTimeout(function () { el.style.display = 'none'; }, timeout);
 	};
-		
-	LRBCUX.interface.defineforgot = function (){
-		
-		var forgotpassword_options = {};
-		
-			forgotpassword_options.container = "forgotpassword-div";
-			
-			forgotpassword_options.onSuccess = function(response){
 
-				document.getElementById("fade").style.display = 'none';
-				LRBCUX.interface.showMessage("An Email link has been sent to the specified email. Click on the link to reset your password.",5000);
-			};
-			
-			forgotpassword_options.onError = function(errors) {
-
-				document.getElementById("fade").style.display = 'none';
-				if(errors.length && errors[0].Description!=null)
-					LRBCUX.interface.showMessage(errors[0].Description,5000);
-			};
-		LRObject.init("forgotPassword", forgotpassword_options);
-		
-		};
-	
-	LRBCUX.interface.definereset= function (){
-		
-		var resetpassword_options = {};
-		
-			resetpassword_options.container = "resetpassword-container";
-			
-			resetpassword_options.onSuccess =function(response) {
-
-			  LoginRadiusBCUX.interface.toggleform('login');
-				
-			  LRBCUX.interface.showMessage("Your new password has been set",5000);
-			  document.getElementById("fade").style.display = 'none';
-			};
-			
-			resetpassword_options.onError = function(errors) {
-				if(errors.length && errors[0].Description!=null)
-					LRBCUX.interface.showMessage(errors[0].Description,5000);
-				if(errors.length && errors[0].message!=null &&errors[0].id)
-					LRBCUX.interface.showMessage(errors[0].message,5000);
-				document.getElementById("fade").style.display = 'none';
-			};
-		var vtype = LRObject.util.getQueryParameterByName("vtype");	
-		if (vtype != null && vtype != "") {
-			if (vtype == "reset")
-				{
-					LRObject.init("resetPassword", resetpassword_options);
-				}
-			}
-		};
-	
-	LRBCUX.interface.defineverify=function (){
-		
-		var verifyemail_options = {};
-		
-			verifyemail_options.onSuccess = function(response) {
-				var locCheck=window.location.href
-				if(!locCheck.includes("vtype=reset")){
-					LRBCUX.interface.showMessage("Your email has been successfully verified.",5000);
-				}
-				document.getElementById("fade").style.display = 'none';
-			};
-			
-			verifyemail_options.onError = function(errors) {
-			  // error
-				if(errors.length && errors[0].Description!=null)
-				{
-					LRBCUX.interface.showMessage(errors[0].Description,5000);
-					document.getElementById("fade").style.display = 'none';
-				}
-			};
-		var vtype = LRObject.util.getQueryParameterByName("vtype");	
-		if (vtype != null && vtype != "") {
-			if (vtype == "emailverification")
-				{
-				
-					LRObject.init("verifyEmail", verifyemail_options);
-				}
-			}
-		
-	};
-		
-	//V2 Interfaces
-
-	LRBCUX.interface.definechangepassword=function (){
-		var changepassword_options = {};
-		
-			changepassword_options.container = "changepassword-container";
-			changepassword_options.onSuccess = function(response) {
-				
-				console.log(response);
-				LRBCUX.interface.showMessage("Password has been successfully updated",5000);
-			};
-			changepassword_options.onError = function(response) {
-				
-				LRBCUX.interface.showMessage(response[0].Description,5000);
-			};
-			LRObject.init("changePassword",changepassword_options);
-	};
-	LRBCUX.interface.defineprofileeditor=function (){
-		var profileeditor_options = {};
-			profileeditor_options.container = "profileeditor-container";
-			profileeditor_options.onSuccess = function(response) {
-				try{
-					var token="";
-					token=$LRBC.util.getBrowserStorage("LRTokenKey");
-					if(token.length>0)
-					{
-						var url=$LRBC.util.getURL(token,option.apiKey ,"",storeName);
-						
-						$LRBC.util.jsonpCall(url,function(tokendata){
-						
-							if(tokendata.loginUrl!=null)
-							{
-								LRBCUX.interface.showMessage("Profile has been successfully updated",5000);
-								
-							}else{
-								LRBCUX.interface.showMessage("Something went wrong during update please try again",5000);
-								document.getElementById("fade").style.display = 'none';
-							}
-						}); 
-					}
-				}
-				catch(e){
-					LRBCUX.interface.showMessage("Something went wrong during update please try again",5000);
-					document.getElementById("fade").style.display = 'none';
-				}
-				
-			};
-			profileeditor_options.onError = function(response) {
-		
-				LRBCUX.interface.showMessage(response[0].Description,5000);
-			};
-		LRObject.init("profileEditor",profileeditor_options);
-
-	};	
-
-	LRBCUX.interface.defineaddemail=function (){
-		var addemail_options= {};
-			addemail_options.container = "addemail-container";
-			addemail_options.onSuccess = function(response) {
-			// On Success
-			console.log(response);
-			LRBCUX.interface.showMessage("Email has been successfully updated",5000);
-			};
-			addemail_options.onError = function(response) {
-			// On Error
-			LRBCUX.interface.showMessage(response[0].Description,5000);
-			};
-			LRObject.init("addEmail",addemail_options);
-	};
-	LRBCUX.interface.defineremoveemail=function (){
-		var removeemail_options= {};
-			removeemail_options.container = "removeemail-container";
-			removeemail_options.onSuccess = function(response) {
-			// On Success
-			console.log(response);
-			LRBCUX.interface.showMessage("Email has been successfully removed",5000);
-			};
-			removeemail_options.onError = function(response) {
-			// On Error
-				LRBCUX.interface.showMessage(response[0].Description,5000);
-			};
-			
-			LRObject.init("removeEmail",removeemail_options);
-	};	
-	
-	
-//End V2 Interfaces	
-	
-	LRBCUX.interface.injectSpinner=function(){
-		
-		if(!document.getElementById("fade")){
-			var div = document.createElement("div");
-				div.innerHTML = '<div class="lr-loading-frame"> <div class="lr-loading-box" style="background: url(//cdn.loginradius.com/demo/common/loading_spinner.gif) no-repeat center center;"> <span class="lr-loading-text-box"></span> </div> </div>	<div id="overshow" style="display:none"></div>';
-				div.id="fade";
-				div.style.cssText ="position: fixed; height: 100%; width: 100%; background-color:transparent; opacity: 0.8; top: 0px; left: 0px; display:none;";
-				document.body.appendChild(div);
-	
+	// Shared success handler: turn a LoginRadius access token into a
+	// BigCommerce session. Used by both login and social login (all of
+	// which arrive through the unified `auth` component in V3).
+	LRBCUX.interface.completeBigCommerceLogin = function (response) {
+		if (!response || !response.access_token) {
+			return false;
 		}
-		
-	}
-	
-	LRBCUX.interface.DisplayAuth=function (){
-		
-		LRBCUX.interface.injectSpinner();
-		
-		LRObject.$hooks.register('socialLoginFormRender',function(){
-			LoginRadiusBCUX.interface.toggleform('additional');
-					
-			document.getElementById("fade").style.display = 'none';
+		// Propagate the session to the SSO hub so other tenant properties see it.
+		$LRBC.util.setSsoToken(response.access_token, option.apiKey);
+		var url = $LRBC.util.getURL(response.access_token, option.apiKey, "", storeName);
+		LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily", 5000);
+		$LRBC.util.jsonpCall(url, function (tokendata) {
+			if (tokendata && tokendata.loginUrl != null) {
+				$LRBC.util.sendusertosite(tokendata.loginUrl);
+			} else {
+				LRBCUX.interface.showMessage("Something went wrong during login please try again", 5000);
+			}
 		});
-		
-		document.getElementById("authcontainer").style.display = 'block';
-		LRObject.util.ready(function() {
-		
-				LRBCUX.interface.definelogin();
-				
-				LRBCUX.interface.defineregister();
-				
-				LRBCUX.interface.definesocial();
-				
-				LRBCUX.interface.defineforgot();
-				
-				LRBCUX.interface.defineverify();
-				
-				LRBCUX.interface.definereset();
-				var locCheck=window.location.href
-				if(locCheck.includes("vtype=reset")){
-					LRBCUX.interface.toggleform('forgot');
-					
-				 document.getElementById("forgotpassword-div").style.display = 'none';	
-				}
-				
-			});
-		};
-	
-	LRBCUX.interface.hideforms=function (){
-		 document.getElementById("lr-login-container").style.display = 'none';
-		 document.getElementById("lr-fp-container").style.display = 'none';
-		 document.getElementById("lr-reg-container").style.display = 'none';
-		 document.getElementById("lr-additional-container").style.display = 'none';
-		
+		return true;
 	};
-	LRBCUX.interface.toggleform=function (action)
-		{
-			 switch (action) {
-					case 'register':				
-						LRBCUX.interface.hideforms();
-						 document.getElementById("lr-reg-container").style.display = 'block';
-						break; 
-				
-					case 'login':				
-						LRBCUX.interface.hideforms();
-						  document.getElementById("lr-login-container").style.display = 'block';
-						break; 
-						
-					case 'forgot':				
-						LRBCUX.interface.hideforms();
-						 document.getElementById("lr-fp-container").style.display = 'block';
-						break; 
-					case 'additional':				
-						LRBCUX.interface.hideforms();
-						 document.getElementById("lr-additional-container").style.display = 'block';
-						break; 	
-					default:
-						break;
-			 }
-		};
-		
+
+	// Unified login + registration + social + forgot password.
+	LRBCUX.interface.defineAuth = function () {
+		LRObject.init("auth", {
+			container: "lr-auth-container",
+			onSuccess: function (response) {
+				// Login / social login return an access token -> establish the
+				// BigCommerce session. Registration success (no token) is handled
+				// by the SDK's own messaging (verification email sent).
+				LRBCUX.interface.completeBigCommerceLogin(response);
+			},
+			onError: function (errors) {
+				// The V3 SDK surfaces field/flow errors inline; nothing extra needed.
+			}
+		});
+	};
+
+	// Email / token verification. V3's verifyToken auto-reads the token from
+	// the URL, so only mount it when a verification link is being handled.
+	LRBCUX.interface.defineVerify = function () {
+		var hasToken = $LRBC.util.getParameterByName("vtype") ||
+			$LRBC.util.getParameterByName("verification_token") ||
+			$LRBC.util.getParameterByName("vtoken");
+		if (!hasToken) {
+			return;
+		}
+		LRObject.init("verifyToken", {
+			container: "lr-verify-container",
+			onSuccess: function (response) {
+				LRBCUX.interface.showMessage("Your request has been verified successfully.", 5000);
+			},
+			onError: function (errors) { }
+		});
+	};
+
+	LRBCUX.interface.DisplayAuth = function () {
+		var wrapper = document.getElementById("authcontainer");
+		if (wrapper) {
+			wrapper.style.display = 'block';
+		}
+		LRBCUX.interface.defineAuth();
+		LRBCUX.interface.defineVerify();
+	};
+
+	/* --- Account management components (used by the standalone panels; not
+	 * wired into the default login flow). BigCommerce profile re-sync after an
+	 * update is deferred to step 4 pending the V3 token-retrieval approach. --- */
+	LRBCUX.interface.defineProfileEditor = function () {
+		LRObject.init("profileEditor", {
+			container: "profileeditor-container",
+			onSuccess: function (response) {
+				LRBCUX.interface.showMessage("Profile has been successfully updated", 5000);
+			},
+			onError: function (errors) { }
+		});
+	};
+
+	LRBCUX.interface.defineChangePassword = function () {
+		LRObject.init("changePassword", {
+			container: "changepassword-container",
+			onSuccess: function (response) {
+				LRBCUX.interface.showMessage("Password has been successfully updated", 5000);
+			},
+			onError: function (errors) { }
+		});
+	};
+
+	LRBCUX.interface.defineAddEmail = function () {
+		LRObject.init("addEmail", {
+			container: "addemail-container",
+			onSuccess: function (response) {
+				LRBCUX.interface.showMessage("Email has been successfully updated", 5000);
+			},
+			onError: function (errors) { }
+		});
+	};
+
 	return LRBCUX;
 })(document);
