@@ -1,10 +1,8 @@
-{{!--
-	LoginRadius V3 auth UI. The unified `auth` component renders login,
-	registration, social login and forgot-password in a single widget
-	(styled by LoginRadiusV3.css, loaded via LRreferences). Verification
-	links are resolved by the verifyToken component.
---}}
-<div id="authcontainer" class="login-row" style="display:none">
+
+<style>
+	.login .page-heading { margin-bottom: 0.75rem; }
+</style>
+<div id="authcontainer" style="display:none;max-width:480px;width:100%;margin:0 auto 2rem;">
 	<div id="lr-message-container" class="lr-popup-message"
 		 style="display:none;margin:1rem 0;padding:0.75rem 1rem;border:1px solid #d9d9d9;border-radius:4px;background:#f7f7f7;"></div>
 	<div id="lr-auth-container"></div>
@@ -14,8 +12,7 @@
 	(function () {
 		var attempts = 0;
 		function lrInitAuth() {
-			// LRreferences (SDK + interface) may load after this inline
-			// script, so wait until both are available before running.
+
 			if (typeof LoginRadiusBCUX === 'undefined' || typeof LRObject === 'undefined') {
 				if (attempts++ < 100) {
 					return window.setTimeout(lrInitAuth, 50);
