@@ -6,7 +6,10 @@
 
 		var apiKey = (typeof option !== 'undefined' && option) ? option.apiKey : '';
 		var tenant = (typeof ssoTenantName !== 'undefined') ? ssoTenantName : '';
-		var logoutUrl = "{{urls.auth.logout}}";
+		{{!-- Triple-brace (unescaped): this value is assigned into a JS string,
+		      not HTML. {{ }} would HTML-escape "=" to "&#x3D;", producing the
+		      broken URL /login.php?action&#x3D;logout and an auto-logout loop. --}}
+		var logoutUrl = "{{{urls.auth.logout}}}";
 		var isCustomerLoggedIn = {{#if customer}}true{{else}}false{{/if}};
 
 		if (!apiKey || !tenant) {
@@ -24,12 +27,11 @@
 		}
 
 		function validateToken(token) {
-			// Returns a promise resolving true if the token is still valid.
 			var url = "https://api.loginradius.com/identity/v2/auth/access_token/Validate?access_token=" +
 				encodeURIComponent(token) + "&apikey=" + encodeURIComponent(apiKey);
 			return fetch(url)
 				.then(function (r) { return r.ok; })
-				.catch(function () { return true; }); // network error: don't force logout
+				.catch(function () { return true; });
 		}
 
 		function checkSsoSession() {
@@ -37,30 +39,46 @@
 				.then(function (r) { return r.json(); });
 		}
 
+
+		function getShopperToken() {
+			var stored = LoginRadius_Bigcommerce.util.getBrowserStorage("LRTokenKey");
+			if (stored) {
+				return stored;
+			}
+			try {
+				if (typeof LRObject !== 'undefined' && LRObject) {
+					if (typeof LRObject.getSessionToken === 'function') {
+						return LRObject.getSessionToken();
+					}
+					if (LRObject.api && typeof LRObject.api.getSessionToken === 'function') {
+						return LRObject.api.getSessionToken();
+					}
+				}
+			} catch (e) { /* ignore */ }
+			return null;
+		}
+
 		function run() {
+			if (isCustomerLoggedIn) {
+				var ownToken = getShopperToken();
+				if (!ownToken) {
+					return;
+				}
+				validateToken(ownToken).then(function (valid) {
+					if (!valid) {
+						window.location = logoutUrl;
+					}
+				});
+				return;
+			}
+
 			checkSsoSession().then(function (data) {
 				var isAuth = !!(data && data.isauthenticated === true);
 				var token = data && data.token;
-
-				if (isCustomerLoggedIn) {
-					// Auto-logout: no active LoginRadius session -> log out of BigCommerce.
-					if (!isAuth || !token) {
-						window.location = logoutUrl;
-						return;
-					}
-					validateToken(token).then(function (valid) {
-						if (!valid) {
-							window.location = logoutUrl;
-						}
-					});
-				} else {
-					// Auto-login: active session on a sibling property -> log into BigCommerce.
-					if (isAuth && token) {
-						loginToBigCommerce(token);
-					}
+				if (isAuth && token) {
+					loginToBigCommerce(token);
 				}
 			}).catch(function () {
-				// SSO check failed (network/CORS/not-whitelisted): leave session as-is.
 			});
 		}
 

@@ -55,6 +55,18 @@ LoginRadius_Bigcommerce.util = {};
 		return null;
 	};
 
+	util.setBrowserStorage = function (key, value) {
+		try {
+			if (isLocalStorageNameSupported('localStorage')) {
+				localStorage.setItem(key, value);
+				return;
+			}
+			if (isLocalStorageNameSupported('sessionStorage')) {
+				sessionStorage.setItem(key, value);
+			}
+		} catch (e) { /* storage unavailable / quota exceeded: non-fatal */ }
+	};
+
 	util.getParameterByName = function (name, url) {
 		if (!url) {
 			url = window.location.href;
@@ -110,6 +122,7 @@ LoginRadiusBCUX = (function (doc) {
 		}
 
 		$LRBC.util.setSsoToken(response.access_token, option.apiKey);
+		$LRBC.util.setBrowserStorage("LRTokenKey", response.access_token);
 		var url = $LRBC.util.getURL(response.access_token, option.apiKey, "", storeName);
 		LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily", 5000);
 		$LRBC.util.jsonpCall(url, function (tokendata) {
