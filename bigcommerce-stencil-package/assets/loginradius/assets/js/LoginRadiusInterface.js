@@ -3,12 +3,7 @@ var LoginRadius_Bigcommerce = {};
 var $LRBC = LoginRadius_Bigcommerce;
 LoginRadius_Bigcommerce.util = {};
 
-/* ------------------------------------------------------------------ *
- * BigCommerce SSO bridge (SDK-agnostic).
- * These helpers exchange a LoginRadius access token for a BigCommerce
- * session via the LoginRadius-hosted endpoint. They do not depend on
- * the LoginRadius SDK version.
- * ------------------------------------------------------------------ */
+
 (function (util) {
 	function isLocalStorageNameSupported(lsname) {
 		if (!window["ignoreSessionStorage"]) {
@@ -72,8 +67,6 @@ LoginRadius_Bigcommerce.util = {};
 		return decodeURIComponent(results[2].replace(/\+/g, " "));
 	};
 
-	// Broadcast a successful login to the LoginRadius Web SSO hub so other
-	// properties sharing this tenant can detect the session (fire-and-forget).
 	util.setSsoToken = function (access_token, apikey) {
 		if (typeof ssoTenantName === 'undefined' || !ssoTenantName) {
 			return;
@@ -98,9 +91,7 @@ LoginRadius_Bigcommerce.util = {};
 	};
 })(LoginRadius_Bigcommerce.util);
 
-/* ------------------------------------------------------------------ *
- * UI layer (LoginRadius V3 JS SDK / LoginRadiusSDK).
- * ------------------------------------------------------------------ */
+
 LoginRadiusBCUX = (function (doc) {
 	var LRBCUX = {};
 	LRBCUX.interface = {};
@@ -113,14 +104,11 @@ LoginRadiusBCUX = (function (doc) {
 		setTimeout(function () { el.style.display = 'none'; }, timeout);
 	};
 
-	// Shared success handler: turn a LoginRadius access token into a
-	// BigCommerce session. Used by both login and social login (all of
-	// which arrive through the unified `auth` component in V3).
 	LRBCUX.interface.completeBigCommerceLogin = function (response) {
 		if (!response || !response.access_token) {
 			return false;
 		}
-		// Propagate the session to the SSO hub so other tenant properties see it.
+
 		$LRBC.util.setSsoToken(response.access_token, option.apiKey);
 		var url = $LRBC.util.getURL(response.access_token, option.apiKey, "", storeName);
 		LRBCUX.interface.showMessage("Login Successful, you will be redirected momentarily", 5000);
@@ -139,19 +127,14 @@ LoginRadiusBCUX = (function (doc) {
 		LRObject.init("auth", {
 			container: "lr-auth-container",
 			onSuccess: function (response) {
-				// Login / social login return an access token -> establish the
-				// BigCommerce session. Registration success (no token) is handled
-				// by the SDK's own messaging (verification email sent).
 				LRBCUX.interface.completeBigCommerceLogin(response);
 			},
 			onError: function (errors) {
-				// The V3 SDK surfaces field/flow errors inline; nothing extra needed.
 			}
 		});
 	};
 
-	// Email / token verification. V3's verifyToken auto-reads the token from
-	// the URL, so only mount it when a verification link is being handled.
+
 	LRBCUX.interface.defineVerify = function () {
 		var hasToken = $LRBC.util.getParameterByName("vtype") ||
 			$LRBC.util.getParameterByName("verification_token") ||
@@ -177,9 +160,7 @@ LoginRadiusBCUX = (function (doc) {
 		LRBCUX.interface.defineVerify();
 	};
 
-	/* --- Account management components (used by the standalone panels; not
-	 * wired into the default login flow). BigCommerce profile re-sync after an
-	 * update is deferred to step 4 pending the V3 token-retrieval approach. --- */
+
 	LRBCUX.interface.defineProfileEditor = function () {
 		LRObject.init("profileEditor", {
 			container: "profileeditor-container",

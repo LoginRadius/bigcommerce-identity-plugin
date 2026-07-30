@@ -1,20 +1,3 @@
-{{!--
-	SSO session sync for LoginRadius V3 (SDK-independent).
-
-	Replaces the V2 init actions (ssoNotLoginThenLogout / ssoLogin / logout) with
-	documented Web SSO REST calls on the tenant hub:
-
-	  - Auto-login (guest): GET https://<tenant>.hub.loginradius.com/ssologin/login
-	      (withCredentials) -> { token, isauthenticated }. If a session exists on a
-	      sibling property, exchange the token for a BigCommerce session.
-	  - Auto-logout (logged-in): validate the shopper's token via
-	      GET https://api.loginradius.com/identity/v2/auth/access_token/Validate
-	      If no active session / invalid token, log out of BigCommerce.
-	  - Broadcast on login is handled in LoginRadiusInterface.js (ssologin/setToken).
-
-	Prerequisite: the storefront domain (and any sibling properties) must be listed
-	under Tenant Settings -> Configured Domains, and cross-domain AJAX whitelisted.
---}}
 <script>
 	(function () {
 		if (typeof enableSSO === 'undefined' || !enableSSO) {
