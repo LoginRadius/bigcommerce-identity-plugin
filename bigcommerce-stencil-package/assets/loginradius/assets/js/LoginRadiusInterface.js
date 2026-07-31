@@ -67,6 +67,28 @@ LoginRadius_Bigcommerce.util = {};
 		} catch (e) { /* storage unavailable / quota exceeded: non-fatal */ }
 	};
 
+	util.removeBrowserStorage = function (key) {
+		try { localStorage.removeItem(key); } catch (e) { }
+		try { sessionStorage.removeItem(key); } catch (e) { }
+	};
+
+
+	var SIGNOUT_MARKER = "LRBCSignOutPending";
+
+	util.setSignOutPending = function () {
+		try { sessionStorage.setItem(SIGNOUT_MARKER, "1"); } catch (e) { }
+	};
+
+	util.clearSignOutPending = function () {
+		try { sessionStorage.removeItem(SIGNOUT_MARKER); } catch (e) { }
+	};
+
+	util.isSignOutInFlight = function () {
+		var pending = false;
+		try { pending = sessionStorage.getItem(SIGNOUT_MARKER) === "1"; } catch (e) { }
+		return pending || util.getParameterByName("action") === "logout";
+	};
+
 	util.getParameterByName = function (name, url) {
 		if (!url) {
 			url = window.location.href;
@@ -108,6 +130,31 @@ LoginRadiusBCUX = (function (doc) {
 	var LRBCUX = {};
 	LRBCUX.interface = {};
 
+	// A hub round trip must never be able to strand a shopper mid sign-out.
+	var HUB_TIMEOUT_MS = 2500;
+	var SIGN_OUT_MAX_WAIT_MS = 3000;
+
+	function settledWithin(promise, ms) {
+		return new Promise(function (resolve) {
+			var settled = false;
+			function done() {
+				if (settled) return;
+				settled = true;
+				resolve();
+			}
+			setTimeout(done, ms);
+			try {
+				Promise.resolve(promise).then(done, done);
+			} catch (e) {
+				done();
+			}
+		});
+	}
+
+	function hasSDK() {
+		return typeof LRObject !== 'undefined' && LRObject;
+	}
+
 	LRBCUX.interface.showMessage = function (msg, timeout) {
 		var el = document.getElementById("lr-message-container");
 		if (!el) return;
@@ -116,8 +163,45 @@ LoginRadiusBCUX = (function (doc) {
 		setTimeout(function () { el.style.display = 'none'; }, timeout);
 	};
 
+
+	LRBCUX.interface.endLoginRadiusSession = function () {
+
+		var settled = hasSDK() && typeof LRObject.ensureSession === 'function'
+			? settledWithin(LRObject.ensureSession(), HUB_TIMEOUT_MS)
+			: Promise.resolve();
+
+		return settled.then(function () {
+			if (hasSDK() && typeof LRObject.logout === 'function') {
+				return settledWithin(LRObject.logout(), HUB_TIMEOUT_MS);
+			}
+		}).then(function () {
+
+			$LRBC.util.removeBrowserStorage("LRTokenKey");
+		});
+	};
+
+	// Sign out of LoginRadius first, then hand off to BigCommerce's own sign-out.
+	LRBCUX.interface.signOut = function (bigCommerceLogoutUrl) {
+		$LRBC.util.setSignOutPending();
+
+		var navigated = false;
+		function proceed() {
+			if (navigated) return;
+			navigated = true;
+			window.location = bigCommerceLogoutUrl;
+		}
+
+		LRBCUX.interface.endLoginRadiusSession().then(proceed, proceed);
+
+		setTimeout(proceed, SIGN_OUT_MAX_WAIT_MS);
+	};
+
 	LRBCUX.interface.completeBigCommerceLogin = function (response) {
 		if (!response || !response.access_token) {
+			return false;
+		}
+
+		if (LRBCUX.interface.signOutInProgress) {
 			return false;
 		}
 
@@ -169,8 +253,11 @@ LoginRadiusBCUX = (function (doc) {
 		if (wrapper) {
 			wrapper.style.display = 'block';
 		}
-		LRBCUX.interface.defineAuth();
-		LRBCUX.interface.defineVerify();
+
+		LRBCUX.interface.sessionReady.then(function () {
+			LRBCUX.interface.defineAuth();
+			LRBCUX.interface.defineVerify();
+		});
 	};
 
 
@@ -203,6 +290,21 @@ LoginRadiusBCUX = (function (doc) {
 			onError: function (errors) { }
 		});
 	};
+
+
+	LRBCUX.interface.signOutInProgress = $LRBC.util.isSignOutInFlight();
+
+	LRBCUX.interface.sessionReady = (function () {
+		if (!LRBCUX.interface.signOutInProgress) {
+			return Promise.resolve(false);
+		}
+		function finish() {
+			$LRBC.util.clearSignOutPending();
+			LRBCUX.interface.signOutInProgress = false;
+			return true;
+		}
+		return LRBCUX.interface.endLoginRadiusSession().then(finish, finish);
+	})();
 
 	return LRBCUX;
 })(document);

@@ -15,7 +15,6 @@
 		if (!apiKey || !tenant) {
 			return;
 		}
-		var ssoBase = "https://" + tenant + ".hub.loginradius.com/ssologin/";
 
 		function loginToBigCommerce(token) {
 			var url = LoginRadius_Bigcommerce.util.getURL(token, apiKey, "", storeName);
@@ -26,6 +25,7 @@
 			});
 		}
 
+
 		function validateToken(token) {
 			var url = "https://api.loginradius.com/identity/v2/auth/access_token/Validate?access_token=" +
 				encodeURIComponent(token) + "&apikey=" + encodeURIComponent(apiKey);
@@ -34,51 +34,80 @@
 				.catch(function () { return true; });
 		}
 
-		function checkSsoSession() {
-			return fetch(ssoBase + "login?apikey=" + encodeURIComponent(apiKey), { credentials: "include" })
-				.then(function (r) { return r.json(); });
-		}
-
 
 		function getShopperToken() {
-			var stored = LoginRadius_Bigcommerce.util.getBrowserStorage("LRTokenKey");
-			if (stored) {
-				return stored;
-			}
 			try {
-				if (typeof LRObject !== 'undefined' && LRObject) {
-					if (typeof LRObject.getSessionToken === 'function') {
-						return LRObject.getSessionToken();
-					}
-					if (LRObject.api && typeof LRObject.api.getSessionToken === 'function') {
-						return LRObject.api.getSessionToken();
+				if (typeof LRObject !== 'undefined' && LRObject && typeof LRObject.getAccessToken === 'function') {
+					var live = LRObject.getAccessToken();
+					if (live) {
+						return live;
 					}
 				}
-			} catch (e) { /* ignore */ }
-			return null;
+			} catch (e) { /* fall through to the persisted copy */ }
+			return LoginRadius_Bigcommerce.util.getBrowserStorage("LRTokenKey");
 		}
 
-		function run() {
+		function isSignOutLink(link) {
+			var href = link.getAttribute('href') || '';
+			return href.indexOf('action=logout') !== -1;
+		}
+
+
+		function interceptSignOut() {
+			document.addEventListener('click', function (e) {
+				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+					return;
+				}
+				var target = e.target;
+				var link = (target && target.closest) ? target.closest('a[href]') : null;
+				if (!link || !isSignOutLink(link)) {
+					return;
+				}
+				e.preventDefault();
+				LoginRadiusBCUX.interface.signOut(link.href);
+			}, true);
+		}
+
+		function syncSession() {
 			if (isCustomerLoggedIn) {
+
 				var ownToken = getShopperToken();
 				if (!ownToken) {
 					return;
 				}
 				validateToken(ownToken).then(function (valid) {
 					if (!valid) {
-						window.location = logoutUrl;
+						LoginRadiusBCUX.interface.signOut(logoutUrl);
 					}
 				});
 				return;
 			}
 
-			checkSsoSession().then(function (data) {
-				var isAuth = !!(data && data.isauthenticated === true);
-				var token = data && data.token;
-				if (isAuth && token) {
+			if (typeof LRObject === 'undefined' || !LRObject || typeof LRObject.ensureSession !== 'function') {
+				return;
+			}
+			LRObject.ensureSession().then(function () {
+				var token = LRObject.getAccessToken();
+				if (token) {
 					loginToBigCommerce(token);
 				}
 			}).catch(function () {
+				// No hub session, or the hub is unreachable: stay a guest.
+			});
+		}
+
+		function run() {
+
+			if (typeof LoginRadiusBCUX === 'undefined' || !LoginRadiusBCUX.interface ||
+				typeof LoginRadiusBCUX.interface.signOut !== 'function') {
+				return;
+			}
+			interceptSignOut();
+			// Never restore a session on the page load a sign-out landed on.
+			LoginRadiusBCUX.interface.sessionReady.then(function (signedOut) {
+				if (!signedOut) {
+					syncSession();
+				}
 			});
 		}
 

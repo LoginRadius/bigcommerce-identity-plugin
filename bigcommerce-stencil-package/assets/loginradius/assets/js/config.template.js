@@ -7,6 +7,7 @@ var ssoTenantName = '__LR_TENANT_NAME__';
 var option = {
 	apiKey: "__LR_API_KEY__",
 	sott: "__LR_SOTT__",
+	appName: ssoTenantName,
 	callbackUrl: window.location.href,
 	verificationUrl: window.location.href.split("?")[0],
 	resetPasswordUrl: window.location.href.split("?")[0]
