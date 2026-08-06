@@ -1,6 +1,11 @@
+{{!--
+	Kept for backwards compatibility.
 
-		
-		<div id="forgotpassword-div"></div>
-		<div id="resetpassword-container"></div>
-		
-		<script>LoginRadiusBCUX.interface.defineforgot();		LoginRadiusBCUX.interface.definereset();</script>
+	V2 mounted forgot-password and reset-password panels here via defineforgot()
+	and definereset(). In V3, forgot password is part of the "auth" component and
+	the reset link is resolved by the "verifyToken" component, both of which
+	components/loginradius/auth renders.
+
+	Link with ?action=forgotpassword to open the forgot-password screen first.
+--}}
+{{> components/loginradius/auth}}

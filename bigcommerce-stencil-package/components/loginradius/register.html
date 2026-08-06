@@ -1,5 +1,12 @@
+{{!--
+	Kept for backwards compatibility.
 
-		
-		<div id="register-div" >
-		
-		<script>LoginRadiusBCUX.interface.defineregister();</script>
+	V2 mounted a registration-only form here via defineregister(). V3's "auth"
+	component renders sign up alongside sign in, social login and forgot
+	password, so this include delegates to components/loginradius/auth.
+
+	To land shoppers directly on the sign-up screen, link to this page with
+	?action=register: the Auth component reads that query parameter and opens
+	the registration screen first.
+--}}
+{{> components/loginradius/auth}}

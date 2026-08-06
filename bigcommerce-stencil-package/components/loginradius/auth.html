@@ -1,4 +1,12 @@
+{{!--
+	Unified LoginRadius auth surface.
 
+	V3's "auth" component renders sign in, sign up, social login and forgot
+	password in a single container, so this one include replaces the separate
+	login / register / social / forgot panels the V2 integration used.
+	components/loginradius/login, register, social, forgot and verify all
+	delegate here so existing theme includes keep working.
+--}}
 <style>
 	.login .page-heading { margin-bottom: 0.75rem; }
 </style>
@@ -10,6 +18,14 @@
 </div>
 <script>
 	(function () {
+		// A page that includes both this component and one of the compatibility
+		// wrappers (login/register/social/forgot/verify) would otherwise mount
+		// the SDK twice into the same container.
+		if (window.lrAuthMounted) {
+			return;
+		}
+		window.lrAuthMounted = true;
+
 		var attempts = 0;
 		function lrInitAuth() {
 

@@ -1,15 +1,13 @@
-		
-		<script type="text/html" id="loginradiuscustom_tmpl">
-			<span class="lr-provider-label lr-sl-shaded-brick-button lr-flat-<#=Name.toLowerCase()#>"
-				  onclick="return <#=ObjectName#>.util.openWindow('<#= Endpoint #>');"
-				  title="Sign in with <#= Name #>" alt="Sign in with <#=Name#>">
-				<span class="lr-sl-icon lr-sl-icon-<#=Name.toLowerCase()#>"></span>
-				Sign in with <#=Name#>
-			</span>
-		</script>
-				
-		<div id="sociallogin-container" ></div>
-		<div class="interfacecontainerdiv lr-sl-shaded-brick-frame lr-column" id="interfacecontainerdiv"> </div>
-		
-				
-		<script>LoginRadiusBCUX.interface.definesocial();</script>
+{{!--
+	Kept for backwards compatibility.
+
+	V2 mounted social buttons here via definesocial(), using a hand-written
+	loginradiuscustom_tmpl hash template and LRObject.util.openWindow(). V3 drops
+	the hash-template system and renders the providers configured in the Admin
+	Console inside the "auth" component, so this include delegates to
+	components/loginradius/auth.
+
+	For a social-only surface, initialise LRObject.init("socialLogin", ...)
+	against your own container instead.
+--}}
+{{> components/loginradius/auth}}

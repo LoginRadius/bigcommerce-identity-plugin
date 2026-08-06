@@ -101,6 +101,36 @@ LoginRadius_Bigcommerce.util = {};
 		return decodeURIComponent(results[2].replace(/\+/g, " "));
 	};
 
+	// The SDK hands onError either an array of { ErrorCode, Description }, a
+	// single object, an Error, or a plain string depending on where the failure
+	// happened. Normalise all of them to one readable sentence.
+	util.formatErrors = function (errors) {
+		var fallback = "Something went wrong. Please try again.";
+		if (!errors) {
+			return fallback;
+		}
+		if (typeof errors === "string") {
+			return errors;
+		}
+		var list = Object.prototype.toString.call(errors) === "[object Array]" ? errors : [errors];
+		var messages = [];
+		for (var i = 0; i < list.length; i++) {
+			var item = list[i];
+			if (!item) {
+				continue;
+			}
+			if (typeof item === "string") {
+				messages.push(item);
+				continue;
+			}
+			var text = item.Description || item.description || item.Message || item.message;
+			if (text) {
+				messages.push(text);
+			}
+		}
+		return messages.length ? messages.join(" ") : fallback;
+	};
+
 	util.setSsoToken = function (access_token, apikey) {
 		if (typeof ssoTenantName === 'undefined' || !ssoTenantName) {
 			return;
@@ -161,6 +191,26 @@ LoginRadiusBCUX = (function (doc) {
 		el.style.display = 'block';
 		el.innerHTML = msg;
 		setTimeout(function () { el.style.display = 'none'; }, timeout);
+	};
+
+	// V3 renders its own error UI inside each component (errorMessageConfig,
+	// which defaults to a toast), so echoing every failure into
+	// #lr-message-container as the V2 code did would show it twice. We always
+	// log for diagnostics and only fall back to our own container when a store
+	// has switched the SDK's error messaging off.
+	function sdkErrorUiDisabled() {
+		return typeof option !== 'undefined' && option && option.errorMessageConfig &&
+			option.errorMessageConfig.messageType === 'none';
+	}
+
+	LRBCUX.interface.reportError = function (context, errors) {
+		var message = $LRBC.util.formatErrors(errors);
+		if (window.console && window.console.warn) {
+			window.console.warn('LoginRadius (' + context + '): ' + message, errors);
+		}
+		if (sdkErrorUiDisabled()) {
+			LRBCUX.interface.showMessage(message, 5000);
+		}
 	};
 
 
@@ -227,6 +277,7 @@ LoginRadiusBCUX = (function (doc) {
 				LRBCUX.interface.completeBigCommerceLogin(response);
 			},
 			onError: function (errors) {
+				LRBCUX.interface.reportError('auth', errors);
 			}
 		});
 	};
@@ -244,7 +295,9 @@ LoginRadiusBCUX = (function (doc) {
 			onSuccess: function (response) {
 				LRBCUX.interface.showMessage("Your request has been verified successfully.", 5000);
 			},
-			onError: function (errors) { }
+			onError: function (errors) {
+				LRBCUX.interface.reportError('verifyToken', errors);
+			}
 		});
 	};
 
@@ -261,13 +314,19 @@ LoginRadiusBCUX = (function (doc) {
 	};
 
 
+	// In V3 "profileEditor" is the full Profile bundle: personal details,
+	// password, email management, social account linking, MFA and account
+	// deletion, subject to the Admin Console configuration. Rendering it alone
+	// covers what the V2 code assembled from separate panels.
 	LRBCUX.interface.defineProfileEditor = function () {
 		LRObject.init("profileEditor", {
 			container: "profileeditor-container",
 			onSuccess: function (response) {
 				LRBCUX.interface.showMessage("Profile has been successfully updated", 5000);
 			},
-			onError: function (errors) { }
+			onError: function (errors) {
+				LRBCUX.interface.reportError('profileEditor', errors);
+			}
 		});
 	};
 
@@ -277,17 +336,24 @@ LoginRadiusBCUX = (function (doc) {
 			onSuccess: function (response) {
 				LRBCUX.interface.showMessage("Password has been successfully updated", 5000);
 			},
-			onError: function (errors) { }
+			onError: function (errors) {
+				LRBCUX.interface.reportError('changePassword', errors);
+			}
 		});
 	};
 
+	// V3 has no standalone RemoveEmail component: "addEmail" adds *and* manages
+	// the addresses on the account, so the V2 defineremoveemail() panel has no
+	// V3 equivalent and is intentionally not carried over.
 	LRBCUX.interface.defineAddEmail = function () {
 		LRObject.init("addEmail", {
 			container: "addemail-container",
 			onSuccess: function (response) {
 				LRBCUX.interface.showMessage("Email has been successfully updated", 5000);
 			},
-			onError: function (errors) { }
+			onError: function (errors) {
+				LRBCUX.interface.reportError('addEmail', errors);
+			}
 		});
 	};
 

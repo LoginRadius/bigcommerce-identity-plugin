@@ -1,3 +1,23 @@
+{{!--
+	Guest checkout sign-in prompt.
+
+	The V2 version embedded the whole LoginRadius surface (login, register, forgot
+	password, reset, social, plus its own guest/forgot/register toggles) inside
+	BigCommerce's Optimized One-Page Checkout. It did that by polling every 100ms
+	for #checkout-customer-login and replaceWith()-ing nodes inside the React
+	checkout tree. Optimized Checkout is a closed React app: it owns that DOM,
+	re-renders it on every step change, and BigCommerce does not support injecting
+	into it. Any markup we put there was wiped on re-render, and the forms it
+	replaced were the ones checkout relies on to create its customer session.
+
+	So this component now does one thing: render a prompt next to checkout (as a
+	sibling *before* #checkout-app, outside React's control) that links to
+	/login.php?return_url=<current url>. The shopper authenticates on the login
+	page against the full V3 auth component - sign in, sign up, social and forgot
+	password all included - and util.getURL() reads return_url to send them
+	straight back to checkout, already logged in. Shoppers who want to check out
+	as a guest use BigCommerce's own guest option, which is now left untouched.
+--}}
 {{#unless customer}}
 <style>
 	.lr-checkout-signin {

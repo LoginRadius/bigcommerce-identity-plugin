@@ -1,10 +1,24 @@
+{{!--
+	LoginRadius script/style references. Include this once, in your theme layout,
+	before any other loginradius component.
 
-	<link rel="stylesheet" href="https://auth.lrcontent.com/v2/LoginRadiusV3.css" />
+	V3 ships its own stylesheet, so LoginRadiusV3.css replaces the four
+	hand-maintained RaaS stylesheets the V2 integration loaded on every page.
 
-	<script src="https://auth.lrcontent.com/v2/LoginRadiusV3.js"></script>
+	The V2 file also carried a commented-out include for
+	assets/loginradius/assets/js/LoginRadiusMigHandler.js. That shim existed for
+	one-time password migration into LoginRadius: it hijacked the V2 login form's
+	onsubmit and posted the credentials to /sso/bigcommerce/api/validatepassword.
+	It was already disabled here, it targets V2 form IDs that V3 does not render,
+	and password migration for this integration is complete, so the shim and its
+	commented include were removed together rather than left as a dead pointer to
+	a deleted file. If a store ever needs a fresh migration, recover the file from
+	git history and re-add it against the V3 markup.
+--}}
+<link rel="stylesheet" href="https://auth.lrcontent.com/v2/LoginRadiusV3.css" />
 
-	<script src="{{cdn '/assets/loginradius/assets/js/config.js'}}"></script>
+<script src="https://auth.lrcontent.com/v2/LoginRadiusV3.js"></script>
 
-	<script src="{{cdn '/assets/loginradius/assets/js/LoginRadiusInterface.js'}}"></script>
+<script src="{{cdn '/assets/loginradius/assets/js/config.js'}}"></script>
 
-
+<script src="{{cdn '/assets/loginradius/assets/js/LoginRadiusInterface.js'}}"></script>
