@@ -46,7 +46,7 @@ Fill in `.env`:
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `LR_STORE_NAME` | yes | BigCommerce store name from your store URL. For `https://my-store.mybigcommerce.com` this is `my-store`. |
+| `LR_STORE_NAME` | yes | BigCommerce **store hash** — an opaque ID, not your store's subdomain. Find it in the API path of any store API account (`https://api.bigcommerce.com/stores/<store_hash>/v3/`) under Settings → API accounts, or in the control panel URL after signing in. This is the value LoginRadius passes as `store` to the BigCommerce SSO bridge. |
 | `LR_API_KEY` | yes | LoginRadius API Key (Admin Console → Tenant Settings → API Credentials). Public by design — it ships in the theme bundle. |
 | `LR_TENANT_NAME` | yes | LoginRadius tenant/site name. Used for the SSO hub host `https://<LR_TENANT_NAME>.hub.loginradius.com`. |
 | `LR_APP_NAME` | no | Only set this if your app name differs from the tenant name. Falls back to `LR_TENANT_NAME`. |
@@ -216,6 +216,7 @@ Stencil package.
 | `[generate-config] missing required .env values` | Fill in `LR_STORE_NAME`, `LR_API_KEY`, `LR_TENANT_NAME`. |
 | `LoginRadius: interface/SDK failed to load` in the console | `LRreferences` is missing from the layout, or `config.js` was never generated. |
 | Auth widget never appears | Confirm `assets/loginradius/assets/js/config.js` exists in the theme and that `LR_API_KEY` is set. |
+| LoginRadius sign-in succeeds but the shopper is never logged into BigCommerce | `LR_STORE_NAME` must be the store hash (`3mhucbxfyj`), not the subdomain. The SSO bridge returns no `loginUrl` for an unknown store. |
 | Registration fails with a SOTT error | Enable Bot Protection (Captcha) in the Admin Console, or set a valid `LR_SOTT`. |
 | Sign-out bounces straight back in | `LRsso` must be in the layout. It ends the LoginRadius session before BigCommerce logout. |
 | Social login doesn't return to checkout | `callbackUrl` must keep the query string so `return_url` survives. Don't strip it in `config.template.js`. |
