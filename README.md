@@ -223,4 +223,4 @@ Stencil package.
 
 ## License
 
-MIT. Copyright (C) LoginRadius Inc.
+Copyright © 2026 LoginRadius Global Inc.
