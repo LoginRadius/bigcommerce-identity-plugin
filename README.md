@@ -107,6 +107,28 @@ new-customer panel with:
 {{> components/loginradius/auth }}
 ```
 
+**The other auth pages** — Cornerstone ships four more templates in
+`templates/pages/auth/` that render native BigCommerce forms. They stay reachable
+through header links and direct URLs, so leaving them alone lets shoppers create
+accounts and reset passwords *outside* LoginRadius, which is the main way a
+half-finished install goes wrong. Replace the native form in each with the same
+include:
+
+| Template | Native form to remove |
+| --- | --- |
+| `create-account.html` | Registration form |
+| `forgot-password.html` | Forgot-password form |
+| `new-password.html` | Reset-password form |
+
+```handlebars
+{{> components/loginradius/auth }}
+```
+
+One include covers all three: `auth` renders sign in, sign up and forgot
+password together, and resolves reset/verification tokens when it finds one in
+the URL. `account-created.html` is a confirmation page with no form, so it can be
+left as is.
+
 **`templates/pages/checkout.html`** — after the header:
 
 ```handlebars
@@ -114,7 +136,9 @@ new-customer panel with:
 ```
 
 **Account pages (optional)** — to hand profile management to LoginRadius, add
-`{{> components/loginradius/accountdetails }}` to your account template.
+`{{> components/loginradius/accountdetails }}` to your account template. Left
+out, shoppers edit their profile and password in BigCommerce only and the two
+records drift apart.
 
 ### 5. Configure the LoginRadius Admin Console
 
