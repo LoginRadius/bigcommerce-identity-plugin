@@ -227,16 +227,11 @@ records drift apart.
 
 ### 7. Configure LoginRadius and BigCommerce — in the browser
 
-- Install the LoginRadius app from the BigCommerce Marketplace (Apps →
-  Marketplace → search LoginRadius), then enter your LoginRadius API key and API
-  secret and validate. See the
-  [LoginRadius Stencil plugin guide](https://www.loginradius.com/docs/sdk/turnkey-plugins/bigcommerce-stencil-plugin/).
 - Create a store-level API account in BigCommerce (Settings → API accounts) for
   the SSO connector. This is separate from the Stencil CLI token in step 4. The
   connector looks up a customer by email, creates one if missing, and then opens a
   BigCommerce session, so grant **Customers: modify** and **Customers login:
-  login**. Nothing else is needed — leave the remaining scopes at *none* rather
-  than handing a third party a broad token.
+  login**. Remaining scopes of API can be configured towards your needs. (EXAMPLE: Channel settings read-only, Sites & routes read-only, Themes, Content, Customers, Customers login, Information & settings read-only)
 - Fill in the BigCommerce SSO form in the LoginRadius Admin Console:
 
   | Field | Value |
@@ -355,13 +350,6 @@ If you prefer to keep a theme checkout in the repo root, ignore those files
 through `.git/info/exclude` rather than `.gitignore`, so the shared ignore list
 stays limited to real plugin artifacts (`.env`, the generated `config.js`, and
 Stencil CLI state).
-
-## Blueprint package
-
-`bigcommerce-blueprint-package/` targets the legacy Blueprint theme framework and
-is still on the LoginRadius V2 SDK. It was not part of the V3 migration and is
-kept for stores that have not moved to Stencil. New integrations should use the
-Stencil package.
 
 ## Troubleshooting
 
