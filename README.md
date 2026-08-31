@@ -265,7 +265,13 @@ stencil push          # deploy to the store (needs a publish-theme token)
 `lang/*.json` files. That is a pre-existing Cornerstone issue, unrelated to this
 plugin, and safe to ignore.
 
-### 9. Check it worked
+### 9. Changing the LoginRadius Login Widget to Fit Theme
+
+- Look within the auth_studio_config folder on this repository.
+- Inside this folder contains the html, css, and javascript files necessary to configure a custom login design fit for the BigCommerce theme in LoginRadius' auth studio in the admin console.
+- Simple paste the code from their respective files into the code files within auth studio.
+
+### 10. Check it worked
 
 - Open `http://localhost:3000/login.php`. You should see the LoginRadius auth
   widget, not Cornerstone's login form.
