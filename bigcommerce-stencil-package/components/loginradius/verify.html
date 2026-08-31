@@ -1,7 +1,10 @@
-	<link rel="stylesheet" href="%%ASSET_Styles/loginradius/customize.css%%">
-		<div id="lr-message-container" style="display:none" class="lr-popup-message"></div>
-		<script>
-			
-			LoginRadiusBCUX.interface.defineverify();
-		
-		</script>
+{{!--
+	Kept for backwards compatibility.
+
+	V2 mounted an email-verification panel here via defineverify(). V3 resolves
+	every token-based link (email verification, password reset, magic link) with
+	the "verifyToken" component, which components/loginradius/auth renders into
+	#lr-verify-container and only initialises when a verification token is present
+	in the URL.
+--}}
+{{> components/loginradius/auth}}

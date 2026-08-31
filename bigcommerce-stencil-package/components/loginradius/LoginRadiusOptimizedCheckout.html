@@ -1,113 +1,100 @@
-{{{stylesheet '/assets/loginradius/assets/css/customize.css'}}}
-	{{{stylesheet '/assets/loginradius/assets/css/custom-social.css'}}}
-	{{{stylesheet '/assets/loginradius/assets/css/lr-raas.css'}}}
-	{{{stylesheet '/assets/loginradius/assets/css/social-icons.css'}}}
-	
-	<script src="//auth.lrcontent.com/v2/js/LoginRadiusV2.js"></script>	
-	<script src="{{cdn '/assets/loginradius/assets/js/config.js'}}"></script>
-	<script src="{{cdn '/assets/loginradius/assets/js/LoginRadiusInterface.js'}}"></script>
-	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	<script type="text/html" id="loginradiuscustom_tmpl">
-		<span class="lr-provider-label lr-sl-shaded-brick-button lr-flat-<#=Name.toLowerCase()#>"
-			  onclick="return <#=ObjectName#>.util.openWindow('<#= Endpoint #>');"
-			  title="Sign in with <#= Name #>" alt="Sign in with <#=Name#>">
-			<span class="lr-sl-icon lr-sl-icon-<#=Name.toLowerCase()#>"></span>
-			Sign in with <#=Name#>
-		</span>
-	</script>
-	<script>
+{{!--
+	Guest checkout sign-in prompt.
 
-	function lrDisplayLogin(){
-		lrHideall();
-		$("#login-div").show();
-		$(".interfacecontainerdiv").show();
-		$("#lrLinks").show();
-	};
-	
-	function showguest(){
-		lrHideall();
-		$("div[ui-view='guest']").show();
+	The V2 version embedded the whole LoginRadius surface (login, register, forgot
+	password, reset, social, plus its own guest/forgot/register toggles) inside
+	BigCommerce's Optimized One-Page Checkout. It did that by polling every 100ms
+	for #checkout-customer-login and replaceWith()-ing nodes inside the React
+	checkout tree. Optimized Checkout is a closed React app: it owns that DOM,
+	re-renders it on every step change, and BigCommerce does not support injecting
+	into it. Any markup we put there was wiped on re-render, and the forms it
+	replaced were the ones checkout relies on to create its customer session.
+
+	So this component now does one thing: render a prompt next to checkout (as a
+	sibling *before* #checkout-app, outside React's control) that links to
+	/login.php?return_url=<current url>. The shopper authenticates on the login
+	page against the full V3 auth component - sign in, sign up, social and forgot
+	password all included - and util.getURL() reads return_url to send them
+	straight back to checkout, already logged in. Shoppers who want to check out
+	as a guest use BigCommerce's own guest option, which is now left untouched.
+--}}
+{{#unless customer}}
+<style>
+	.lr-checkout-signin {
+		margin: 0 0 1.5rem;
+		padding: 1rem 1.25rem;
+		border: 1px solid #d9d9d9;
+		border-radius: 4px;
+		background: #f7f7f7;
+		font-size: 0.9rem;
 	}
-	
-	function showforgot(){
-		lrHideall();
-		
-		$("#forgotContainer").show();
-		$("#lrLinks").show();
+	.lr-checkout-signin a {
+		font-weight: 600;
+		text-decoration: underline;
 	}
-	
-	function lrHideall(){
-		$("#lrLinks").hide();
-		$("#forgotContainer").hide();
-		$("#login-div").hide();
-		$(".interfacecontainerdiv").hide();
-		$("div[ui-view='guest']").hide();
-	}
-	
-	function showAdditional(){
-		lrHideall();
-		$("#sociallogin-container").show();
-		$("#lrLinks").show();
-	}
-  
-  var lrloadInterval = setInterval(function(){ 
-    if($("#checkout-customer-login").attr("data-test") != undefined){ 
-      clearInterval(lrloadInterval);
-			
-			$("#checkout-customer-login").replaceWith("<a onclick='lrDisplayLogin();return false;'>Sign in now</a>");
-			
-			var links=document.createElement('div');
-			links.setAttribute('id','lrLinks');
-			
-			var forgotLink=document.createElement('a')
-			forgotLink.setAttribute('onclick','showforgot();return false;');
-			forgotLink.innerHTML="Forgot Password";
-			
-			var guestLink=document.createElement('a')
-			guestLink.setAttribute('onclick','showguest();return false;');
-			guestLink.innerHTML="Continue as Guest";
-			
-			var registerLink=document.createElement('a')
-			registerLink.href="/login.php";
-			registerLink.innerHTML="Register an Account";
-			registerLink.setAttribute('target','_blank');
-			
-			links.appendChild(forgotLink);
-			links.appendChild(guestLink);
-			links.appendChild(registerLink);
-			
-			var forgotContainer=document.createElement('div');
-			forgotContainer.setAttribute('id','forgotContainer');
-			
-			var forgotElement=document.createElement('div');
-			forgotElement.setAttribute('id','forgotpassword-div');
-			var resetElement=document.createElement('div');
-			resetElement.setAttribute('id','resetpassword-container');
-			
-			forgotContainer.appendChild(forgotElement);
-			forgotContainer.appendChild(resetElement);
-			
-			$("#checkout-customer-guest").after(links);
-			$("#checkout-customer-guest").after('<div id="sociallogin-container" ></div>');
-			
-			$("#checkout-customer-guest").after(forgotContainer);
-			
-			$("#checkout-customer-guest").after('<div id="lr-message-container" style="display:none" class="lr-popup-message"></div>');
-			$("#checkout-customer-guest").after('<div id="login-div"></div>');
-			
-			$("#checkout-customer-guest").after('<div class="interfacecontainerdiv lr-sl-shaded-brick-frame lr-column"></div>');
-			
-		    LoginRadiusBCUX.interface.definesocial();
-			LoginRadiusBCUX.interface.definelogin();
-			LoginRadiusBCUX.interface.defineforgot();		
-			LoginRadiusBCUX.interface.definereset();
-			LoginRadiusBCUX.interface.injectSpinner();
-			showguest();
-			LRObject.$hooks.register('socialLoginFormRender',function(){
-				showAdditional();
-			});
+</style>
+<script>
+	(function () {
+		var LOGIN_PATH = '/login.php';
+		var CHECKOUT_APP_SELECTOR = '#checkout-app';
+		var PROMPT_ID = 'lr-checkout-signin';
+		var OBSERVE_TIMEOUT_MS = 15000;
+
+		function buildLoginUrl() {
+			return LOGIN_PATH + '?return_url=' + encodeURIComponent(window.location.href);
 		}
-	},100);
 
-	</script>
+		function injectPrompt(appEl) {
+			if (document.getElementById(PROMPT_ID)) {
+				return;
+			}
+			var wrap = document.createElement('div');
+			wrap.id = PROMPT_ID;
+			wrap.className = 'lr-checkout-signin';
+
+			var label = document.createTextNode('Already have an account? ');
+			var link = document.createElement('a');
+			link.href = buildLoginUrl();
+			link.textContent = 'Sign in to your account';
+
+			wrap.appendChild(label);
+			wrap.appendChild(link);
+
+			// Insert as a sibling *before* the React checkout root so it is not
+			// managed (and wiped) by the checkout app's re-renders.
+			appEl.parentNode.insertBefore(wrap, appEl);
+		}
+
+		function tryInject() {
+			var appEl = document.querySelector(CHECKOUT_APP_SELECTOR);
+			if (appEl) {
+				injectPrompt(appEl);
+				return true;
+			}
+			return false;
+		}
+
+		function init() {
+			if (tryInject()) {
+				return;
+			}
+			// The checkout app mounts asynchronously; watch for it to appear.
+			var observer = new MutationObserver(function () {
+				if (tryInject()) {
+					observer.disconnect();
+				}
+			});
+			observer.observe(document.documentElement, { childList: true, subtree: true });
+			setTimeout(function () {
+				observer.disconnect();
+			}, OBSERVE_TIMEOUT_MS);
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', init);
+		} else {
+			init();
+		}
+	})();
+</script>
+{{/unless}}

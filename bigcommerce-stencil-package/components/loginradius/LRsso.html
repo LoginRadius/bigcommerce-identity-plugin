@@ -1,87 +1,120 @@
-
-
 <script>
-	var logoutUrl="{{urls.auth.logout}}";
-	
-	
-	var logout_options= {};
+	(function () {
+		if (typeof enableSSO === 'undefined' || !enableSSO) {
+			return;
+		}
 
-		logout_options.onSuccess = function() {
-			console.log("Session not found");	
-			window.location=logoutUrl;
+		var apiKey = (typeof option !== 'undefined' && option) ? option.apiKey : '';
+		var tenant = (typeof ssoTenantName !== 'undefined') ? ssoTenantName : '';
+		{{!-- Triple-brace (unescaped): this value is assigned into a JS string,
+		      not HTML. {{ }} would HTML-escape "=" to "&#x3D;", producing the
+		      broken URL /login.php?action&#x3D;logout and an auto-logout loop. --}}
+		var logoutUrl = "{{{urls.auth.logout}}}";
+		var isCustomerLoggedIn = {{#if customer}}true{{else}}false{{/if}};
 
-		};
-	function lrLogout()
-		{
-			
-				LRObject.init("logout", logout_options);
-			
-		  
-		};
-	function lrSSOlogoutCallback()
-	{
-		lrLogout();
-	}
+		if (!apiKey || !tenant) {
+			return;
+		}
 
-	
-	
-	var ssologin_options= {};
-	ssologin_options.onSuccess = function(response) {
-		var url = LoginRadius_Bigcommerce.util.getURL(token,option.appName ,"",storeName);
-			LoginRadius_Bigcommerce.util.jsonpCall(url,function(tokendata){
-						
-							if(tokendata.loginUrl!=null)
-							{
-								
-								LoginRadius_Bigcommerce.util.sendusertosite(tokendata.loginUrl);
-							}else{
-								lrSSOlogoutCallback();
-							}
-						}); 
-		};
-		
-	function lrSSOloggedInCallback()
-	{
-		LRObject.init("ssoLogin", ssologin_options);
-	}
-	
-	var check_options_login= {};
-	var check_options_logout= {};
-	check_options_logout.onError = lrSSOlogoutCallback;
-	check_options_logout.onSuccess=function(){};
-	
-	check_options_login.onSuccess = lrSSOloggedInCallback;
-	check_options_login.onError=function(){};
-	
+		function loginToBigCommerce(token) {
+			var url = LoginRadius_Bigcommerce.util.getURL(token, apiKey, "", storeName);
+			LoginRadius_Bigcommerce.util.jsonpCall(url, function (tokendata) {
+				if (tokendata && tokendata.loginUrl != null) {
+					LoginRadius_Bigcommerce.util.sendusertosite(tokendata.loginUrl);
+				}
+			});
+		}
 
 
-window.onload = function() {
-	//{{#if customer}}
-	
-			LRObject.init("ssoNotLoginThenLogout", check_options_logout);
-	
-//{{else}}
-	
-			LRObject.init("ssoNotLoginThenLogout", check_options_login);
-	
-//{{/if}}
-	LRObject.$hooks.register('startProcess',function ( ) {
-		if(document.getElementById("register-div")&&document.getElementById("register-div").innerHTML.length>100 ){
-				document.getElementById("fade").style.display = 'block';
+		function validateToken(token) {
+			var url = "https://api.loginradius.com/identity/v2/auth/access_token/Validate?access_token=" +
+				encodeURIComponent(token) + "&apikey=" + encodeURIComponent(apiKey);
+			return fetch(url)
+				.then(function (r) { return r.ok; })
+				.catch(function () { return true; });
+		}
+
+
+		function getShopperToken() {
+			try {
+				if (typeof LRObject !== 'undefined' && LRObject && typeof LRObject.getAccessToken === 'function') {
+					var live = LRObject.getAccessToken();
+					if (live) {
+						return live;
+					}
+				}
+			} catch (e) { /* fall through to the persisted copy */ }
+			return LoginRadius_Bigcommerce.util.getBrowserStorage("LRTokenKey");
+		}
+
+		function isSignOutLink(link) {
+			var href = link.getAttribute('href') || '';
+			return href.indexOf('action=logout') !== -1;
+		}
+
+
+		function interceptSignOut() {
+			document.addEventListener('click', function (e) {
+				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+					return;
+				}
+				var target = e.target;
+				var link = (target && target.closest) ? target.closest('a[href]') : null;
+				if (!link || !isSignOutLink(link)) {
+					return;
+				}
+				e.preventDefault();
+				LoginRadiusBCUX.interface.signOut(link.href);
+			}, true);
+		}
+
+		function syncSession() {
+			if (isCustomerLoggedIn) {
+
+				var ownToken = getShopperToken();
+				if (!ownToken) {
+					return;
+				}
+				validateToken(ownToken).then(function (valid) {
+					if (!valid) {
+						LoginRadiusBCUX.interface.signOut(logoutUrl);
+					}
+				});
+				return;
 			}
-	  }
-	);
-};
+
+			if (typeof LRObject === 'undefined' || !LRObject || typeof LRObject.ensureSession !== 'function') {
+				return;
+			}
+			LRObject.ensureSession().then(function () {
+				var token = LRObject.getAccessToken();
+				if (token) {
+					loginToBigCommerce(token);
+				}
+			}).catch(function () {
+				// No hub session, or the hub is unreachable: stay a guest.
+			});
+		}
+
+		function run() {
+
+			if (typeof LoginRadiusBCUX === 'undefined' || !LoginRadiusBCUX.interface ||
+				typeof LoginRadiusBCUX.interface.signOut !== 'function') {
+				return;
+			}
+			interceptSignOut();
+			// Never restore a session on the page load a sign-out landed on.
+			LoginRadiusBCUX.interface.sessionReady.then(function (signedOut) {
+				if (!signedOut) {
+					syncSession();
+				}
+			});
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', run);
+		} else {
+			run();
+		}
+	})();
 </script>
-
-
-<div id="fade" style="position: fixed; height: 100%; width: 100%; background-color:transparent;
-        opacity: 0.8; top: 0px; left: 0px; display:none;">
-              <div class="lr-loading-frame">
-                    <div class="lr-loading-box" style="background: url(//cdn.loginradius.com/demo/common/loading_spinner.gif) no-repeat center center;">
-                        <span class="lr-loading-text-box"></span>
-                    </div>
-                    
-                </div>
-	<div id="overshow" style="display:none"></div>
-</div>

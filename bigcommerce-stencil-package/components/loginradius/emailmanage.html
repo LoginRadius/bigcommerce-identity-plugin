@@ -1,10 +1,12 @@
+{{!--
+	Email management.
 
-		
-		
-		<div id="removeemail-container"></div>
-		<div id="addemail-container"></div>
-		<script>
-		LoginRadiusBCUX.interface.defineaddemail();
-		LoginRadiusBCUX.interface.defineremoveemail();
-		</script>
-		
+	V3 has no standalone RemoveEmail component: "addEmail" both adds and manages
+	the addresses on the account, so the V2 #removeemail-container panel and its
+	defineremoveemail() call have no V3 equivalent and have been dropped.
+--}}
+<div id="lr-message-container" style="display:none" class="lr-popup-message"></div>
+<div id="addemail-container"></div>
+<script>
+	LoginRadiusBCUX.interface.defineAddEmail();
+</script>

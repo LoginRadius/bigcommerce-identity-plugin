@@ -1,6 +1,9 @@
+{{!--
+	Kept for backwards compatibility.
 
-		
-		
-		<div id="login-div"></div>
-		
-		<script>LoginRadiusBCUX.interface.definelogin()</script>
+	The V2 integration mounted a login-only form here via definelogin(). V3's
+	"auth" component renders sign in, sign up, social login and forgot password
+	in one container, so there is no login-only panel to mount any more and this
+	include delegates to components/loginradius/auth.
+--}}
+{{> components/loginradius/auth}}
