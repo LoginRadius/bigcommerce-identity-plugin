@@ -1,0 +1,39 @@
+{{!-- LoginRadius OIDC login button. Used by components/loginradius/login-form; only shown when
+     LR_LOGIN_MODE is 'oidc'. Requires components/loginradius/head in the layout <head>. --}}
+<div id="lr-oidc-login" class="lr-oidc-login" style="display:none">
+    <div id="lr-oidc-error" class="alertBox alertBox--error" role="alert" style="display:none"></div>
+    <button id="lr-oidc-login-button" type="button" class="button button--primary">Sign in</button>
+</div>
+<script>
+    (function () {
+        if (window.LR_LOGIN_MODE !== 'oidc') return; // legacy widget mode: stay hidden
+        document.getElementById('lr-oidc-login').style.display = 'block';
+
+        var button = document.getElementById('lr-oidc-login-button');
+        var cfg = window.LR_OIDC_CONFIG || {};
+        if (cfg.buttonText) button.textContent = cfg.buttonText;
+
+        button.addEventListener('click', function () {
+            button.disabled = true;
+            window.LoginRadiusOIDC.login().catch(function (err) {
+                button.disabled = false;
+                console.error(err);
+            });
+        });
+
+        // Map error codes to fixed messages (never render the raw query value).
+        var messages = {
+            session_expired: 'Your sign-in session expired. Please try again.',
+            invalid_state: 'Sign-in could not be verified. Please try again.',
+            email_not_verified: 'Please verify your email address before signing in.',
+            email_missing: 'Your account needs an email address to sign in to the store.',
+            access_denied: 'Sign-in was cancelled.'
+        };
+        var code = new URLSearchParams(window.location.search).get('lr_error');
+        if (code) {
+            var box = document.getElementById('lr-oidc-error');
+            box.textContent = messages[code] || 'Sign-in failed. Please try again.';
+            box.style.display = 'block';
+        }
+    })();
+</script>

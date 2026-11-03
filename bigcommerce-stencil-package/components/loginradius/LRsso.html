@@ -27,7 +27,9 @@
 	
 	var ssologin_options= {};
 	ssologin_options.onSuccess = function(response) {
-		var url = LoginRadius_Bigcommerce.util.getURL(token,option.appName ,"",storeName);
+		// ssoLogin returns the SSO access token (string, or an object with access_token).
+		var token = (response && response.access_token) || response;
+		var url = LoginRadius_Bigcommerce.util.getURL(token, option.apiKey, "", storeName);
 			LoginRadius_Bigcommerce.util.jsonpCall(url,function(tokendata){
 						
 							if(tokendata.loginUrl!=null)
@@ -56,6 +58,10 @@
 
 
 window.onload = function() {
+	// Legacy JS widget SSO only. In OIDC mode its "no widget session -> log out" check would
+	// sign OIDC customers out of BigCommerce, so it must not run.
+	if (window.LR_LOGIN_MODE === 'oidc' || typeof LRObject === 'undefined') return;
+	if (typeof enableSSO !== 'undefined' && !enableSSO) return; // config.js switch
 	//{{#if customer}}
 	
 			LRObject.init("ssoNotLoginThenLogout", check_options_logout);

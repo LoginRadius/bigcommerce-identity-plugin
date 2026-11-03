@@ -92,7 +92,9 @@
 		
 	</div>
 		<script>
-			LoginRadiusBCUX.interface.DisplayAuth();
+			// Legacy JS widget: only runs when the mode switch (oidc-config.js `enabled`) is false.
+			if (window.LR_LOGIN_MODE !== 'oidc') {
+				LoginRadiusBCUX.interface.DisplayAuth();
+			}
 		</script>
-		
-</div>
+
