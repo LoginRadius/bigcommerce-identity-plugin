@@ -1,0 +1,33 @@
+{{!-- LoginRadius: include once in the <head> of templates/layout/base.html.
+     Reads the mode switch (LR_OIDC_CONFIG.enabled in oidc-config.js) and loads the matching scripts:
+       OIDC   -> oidc-pkce.js (+ handles the ?code&state redirect back from LoginRadius)
+       legacy -> LoginRadiusV2 SDK, config.js, LoginRadiusInterface.js
+     document.write keeps the scripts parser-blocking and in order, because the legacy
+     components call LoginRadiusBCUX inline as soon as they render. --}}
+<script src="{{cdn '/assets/loginradius/assets/js/oidc-config.js'}}"></script>
+<script>
+    (function () {
+        var oidc = !!(window.LR_OIDC_CONFIG && window.LR_OIDC_CONFIG.enabled === true);
+        window.LR_LOGIN_MODE = oidc ? 'oidc' : 'legacy';
+
+        var scripts = oidc
+            ? [{{{json (cdn '/assets/loginradius/assets/js/oidc-pkce.js')}}}]
+            : [
+                'https://auth.lrcontent.com/v2/js/LoginRadiusV2.js',
+                {{{json (cdn '/assets/loginradius/assets/js/config.js')}}},
+                {{{json (cdn '/assets/loginradius/assets/js/LoginRadiusInterface.js')}}}
+            ];
+        for (var i = 0; i < scripts.length; i++) {
+            document.write('<script src="' + scripts[i] + '"><\/script>');
+        }
+    })();
+</script>
+<script>
+    // BigCommerce session state, used for auto SSO and logout interception (OIDC mode).
+    window.LR_BC_CUSTOMER = {{#if customer}}true{{else}}false{{/if}};
+    if (window.LR_LOGIN_MODE === 'oidc' && window.LoginRadiusOIDC) {
+        // Handles the LoginRadius redirect, returns to the starting page after login,
+        // runs the auto SSO check and wires logout links to also end the LoginRadius session.
+        window.LoginRadiusOIDC.init();
+    }
+</script>

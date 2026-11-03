@@ -1,0 +1,5 @@
+{{!-- LoginRadius login UI for templates/pages/auth/login.html.
+     Renders both UIs; only the one matching LR_LOGIN_MODE (set by components/loginradius/head) becomes
+     visible and runs. Requires components/loginradius/head in the layout <head>. --}}
+{{> components/loginradius/oidc-login}}
+{{> components/loginradius/auth}}
